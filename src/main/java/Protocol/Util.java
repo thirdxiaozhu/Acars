@@ -1,5 +1,7 @@
 package Protocol;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -46,7 +48,7 @@ public class Util {
      */
     public static byte[] getCRC16(byte[] data_arr){
         int crc16 = 0x0;
-        //计算BSC码不包含<SOH>
+        //从第二位开始，因为需要避开<SOH>
         for(int i = 1; i < data_arr.length; i++)
         {
             crc16 = (char)(( crc16 >> 8) | (crc16 << 8));
@@ -120,39 +122,38 @@ public class Util {
      * @return
      */
     public static byte[] deLoadCode(byte[] origin){
-        int length = origin.length;
-        byte[] res;
-        //当压缩后的串位数是3的倍数的时候，需要减少一位容量
-        if(length % 3 == 0) {
-            res = new byte[(int)(length / 0.75 - 1)];
-        }else{
-            res = new byte[(int)(length / 0.75)];
-        }
-
-        for(int i = 0, r = 0 ; i < origin.length; i++,r++){
+        List<Byte> resultList = new ArrayList<>();
+        for(int i = 0; i < origin.length; i++){
             switch (i % 3){
                 case 0:
-                    res[r] = (byte)((origin[i] >> 2) & 0x3f);
+                    resultList.add((byte)((origin[i] >> 2) & 0x3f));
                     break;
                 case 1:
-                    res[r] = (byte)(((origin[i-1] << 4) & 0x30) + ((origin[i] >> 4) & 0x0f));
+                    resultList.add((byte)(((origin[i-1] << 4) & 0x30) + ((origin[i] >> 4) & 0x0f)));
                     break;
                 case 2:
-                    res[r] = (byte)(((origin[i-1] << 2) & 0x3c) + ((origin[i] >> 6) & 0x03));
+                    resultList.add((byte)(((origin[i-1] << 2) & 0x3c) + ((origin[i] >> 6) & 0x03)));
                     //如果不是最后一位
                     if(((origin[i]) & 0x3f) != 0){
-                        res[++r] = (byte)((origin[i]) & 0x3f);
+                        resultList.add((byte)((origin[i]) & 0x3f));
                     }
                     break;
                 default:
                     break;
             }
         }
-        return res;
+
+        //Object数组转byte[]数组
+        Object[] resultObj = resultList.toArray();
+        byte[] result = new byte[resultObj.length];
+        for(int i = 0; i < resultObj.length; i++){
+            result[i] = (byte)resultObj[i];
+        }
+
+        return result;
     }
 
-
-    public static String getUntreatedPlainText(DownlinkProtocol protocol){
+    public static String getUntreatedPlainText(Protocol protocol){
         byte[] text = protocol.getContentData();
         StringBuffer sb = new StringBuffer(text.length);
         for(int i = 4; i < text.length; i++){
@@ -166,7 +167,7 @@ public class Util {
      * @param
      * @return
      */
-    public static String getCypherText(DownlinkProtocol protocol){
+    public static String getCypherText(Protocol protocol){
         byte[] text = protocol.getContentData();
         byte[] temp = deLoadCode(protocol.getText());
 

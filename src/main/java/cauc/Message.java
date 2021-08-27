@@ -17,13 +17,15 @@ public class Message {
     public static final int PREVIEW = 0;
     public static final int UPLINK = 1;
 
-    public static byte[] uplinkPreview(MainForm mainForm, int mode){
+    public static UplinkProtocol uplinkPreview(MainForm mainForm, int mode){
         UplinkProtocol protocol = new UplinkProtocol();
         try {
             protocol.setMode(mainForm.modeInput.getText());
             protocol.setArn(mainForm.arnInput.getText());
             protocol.setLabel(mainForm.labelInput.getText());
             protocol.setDubi(mainForm.dubiInput.getText());
+            protocol.setTak(mainForm.takInput.getText());
+
             if(mode == PREVIEW) {
                 protocol.setText(mainForm.text.getText().getBytes());
             }else{
@@ -53,6 +55,6 @@ public class Message {
             e.printStackTrace();
         }
 
-        return protocol.getContentData();
+        return protocol;
     };
 }

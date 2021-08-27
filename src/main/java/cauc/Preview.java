@@ -1,5 +1,6 @@
 package cauc;
 
+import Protocol.UplinkProtocol;
 import Protocol.Util;
 
 import javax.swing.*;
@@ -16,11 +17,11 @@ public class Preview {
 
     public Preview(JFrame frame, MainForm mainForm) {
         this.mainForm = mainForm;
-        byte[] plaintext = Message.uplinkPreview(mainForm, Message.PREVIEW);
-        byte[] ciphertext = Message.uplinkPreview(mainForm, Message.UPLINK);
-        CipherText.setText(new String(ciphertext));
+        UplinkProtocol plain = Message.uplinkPreview(mainForm, Message.PREVIEW);
+        UplinkProtocol cipher = Message.uplinkPreview(mainForm, Message.UPLINK);
+        CipherText.setText(Util.getCypherText(cipher));
         //PlainText.setText(new String(plaintext));
-        PlainText.setText(Util.getDecodedPlainText(plaintext));
+        PlainText.setText(Util.getUntreatedPlainText(plain));
 
         AcceptBtn.addActionListener(new ActionListener() {
             @Override

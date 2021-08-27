@@ -78,7 +78,9 @@
                   </grid>
                   <gridbag weightx="0.0" weighty="0.0" ipadx="20"/>
                 </constraints>
-                <properties/>
+                <properties>
+                  <text value="8888"/>
+                </properties>
               </component>
               <component id="c6e31" class="javax.swing.JButton" binding="startDSP">
                 <constraints>

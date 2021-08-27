@@ -1,10 +1,14 @@
 package cauc;
 
 import Protocol.BasicProtocol;
+import Protocol.DownlinkProtocol;
 import Protocol.SocketUtil;
 
+import javax.swing.*;
 import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,6 +17,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ServerThread implements Runnable{
     private SendTask sendTask;
+    private ReceiveTask receiveTask;
     private Socket socket;
     private InetAddress inetAddress;
     private MainForm mainForm;
@@ -29,6 +34,16 @@ public class ServerThread implements Runnable{
 
     @Override
     public void run() {
+        try {
+            JOptionPane.showMessageDialog(mainForm.mainPanel, "有设备接入");
+            System.out.println("有设备接入");
+            receiveTask = new ReceiveTask();
+            receiveTask.inputStream = new DataInputStream(socket.getInputStream());
+            receiveTask.start();
+            System.out.println("接受线程启动");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void stop(){
@@ -79,6 +94,29 @@ public class ServerThread implements Runnable{
             return false;
         }
         return true;
+    }
+
+    public class ReceiveTask extends Thread{
+        private DataInputStream inputStream;
+        private boolean isCancle;
+
+        @Override
+        public void run() {
+            while(!isCancle){
+                if(!isConnected()){
+                    isCancle = true;
+                    break;
+                }
+
+                if(inputStream != null){
+                    System.out.println("收到！");
+                    BasicProtocol receiveData = SocketUtil.readFromStream(inputStream, DownlinkProtocol.PROTOCOL_TYPE);
+                    if(receiveData != null){
+
+                    }
+                }
+            }
+        }
     }
 
     public class SendTask extends Thread{

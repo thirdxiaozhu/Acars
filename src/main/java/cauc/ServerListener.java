@@ -27,12 +27,9 @@ public class ServerListener{
             while(isStart){
                 Socket socket = serverSocket.accept();
                 serverThread = new ServerThread(socket, mainForm);
-                System.out.println("有设备接入");
 
                 if(socket.isConnected()){
                     executorService.execute(serverThread);
-                    JOptionPane.showMessageDialog(mainForm.mainPanel, "有设备接入");
-                    System.out.println("有设备接入");
                 }
             }
 
