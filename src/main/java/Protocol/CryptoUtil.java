@@ -27,11 +27,6 @@ public class CryptoUtil {
     }
 
     public static byte[] enCrypt(String passwd, byte[] plaintext) throws Exception{
-        //System.out.print("明文： ");
-        //for(byte b: plaintext){
-        //    System.out.print(Integer.toBinaryString( b & 0xff) + " ");
-        //}
-        //System.out.println();
         Cipher cipher = Cipher.getInstance("SM4/ECB/PKCS5PADDING",
                 BouncyCastleProvider.PROVIDER_NAME);
 
@@ -81,10 +76,5 @@ public class CryptoUtil {
         cipher.init(Cipher.DECRYPT_MODE , operateKey(passwd));
 
         return cipher.doFinal(result);
-        //System.out.print("密文： ");
-        //for(byte b: cipher.doFinal(result)){
-        //    System.out.print(Integer.toBinaryString( b & 0xff) + " ");
-        //}
-        //System.out.println();
     }
 }

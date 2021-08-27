@@ -4,6 +4,10 @@ import javax.swing.*;
 import javax.xml.namespace.QName;
 import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
+import java.net.ProtocolException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class DownlinkProtocol extends BasicProtocol implements Protocol , Serializable {
@@ -12,8 +16,8 @@ public class DownlinkProtocol extends BasicProtocol implements Protocol , Serial
     private static final int MSN_LEN = 4;
     private static final int ID_LEN = 6;
 
-    private String msn;
-    private String flightId;
+    private byte[] msn;
+    private byte[] flightId;
 
     private byte[] text;
 
@@ -23,17 +27,17 @@ public class DownlinkProtocol extends BasicProtocol implements Protocol , Serial
     }
 
     public void setMsn(String msn){
-        this.msn = msn;
+        this.msn = msn.getBytes();
     }
-    public String getMsn(){
-        this.msn = "M01A";
+    public byte[] getMsn(){
+        this.msn = "M01A".getBytes()    ;
         return msn;
     }
 
     public void setFlightId(String flightId){
-        this.flightId = flightId;
+        this.flightId = flightId.getBytes();
     }
-    public String getFlightId(){
+    public byte[] getFlightId(){
         return flightId;
     }
 
@@ -67,8 +71,8 @@ public class DownlinkProtocol extends BasicProtocol implements Protocol , Serial
     @Override
     public byte[] getContentData(){
         byte[] base = super.getContentData();
-        byte[] msn = getMsn().getBytes();
-        byte[] flightid = getFlightId().getBytes();
+        byte[] msn = getMsn();
+        byte[] flightid = getFlightId();
         byte[] text = getText();
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream(getLength());
@@ -80,6 +84,46 @@ public class DownlinkProtocol extends BasicProtocol implements Protocol , Serial
         baos.write(setTail(temp),0,getTailLength());
 
         return baos.toByteArray();
+    }
+
+    public byte[] parseText(byte[] data, int pos){
+        List<Byte> resultList = new ArrayList<>();
+        for(int i = 0; i < data.length - pos - 4; i++){
+            resultList.add(data[pos+i]);
+        }
+
+        Object[] resultObj = resultList.toArray();
+        byte[] result = new byte[resultObj.length];
+        for(int i = 0; i < resultObj.length; i++){
+            result[i] = (byte)resultObj[i];
+        }
+        return result;
+    }
+
+    public byte[] parseMsn(byte[] text){
+        byte[] result = new byte[4];
+        System.arraycopy(text, 0, result, 0, 4);
+        return result;
+    }
+
+    public byte[] parseFlightID(byte[] text){
+        byte[] result = new byte[6];
+        System.arraycopy(text, 4, result, 0, 6);
+        return result;
+    }
+
+    @Override
+    public int parseContentData(byte[] data) throws Exception {
+        int pos = super.parseContentData(data);
+        text = Util.deLoadCode( CryptoUtil.deCrypt("1234", parseText(data, pos)));
+        msn = parseMsn(text);
+        flightId = parseFlightID(text);
+
+        //for(byte b: msn){
+        //    System.out.println(Integer.toBinaryString(b&0xff) + " " + Config.TABLE_FOR_6BIT[b & 0x0f][(b >> 4) & 0x07]);
+        //}
+
+        return pos + text.length;
     }
 
 }

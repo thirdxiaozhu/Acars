@@ -38,8 +38,6 @@ public class SocketUtil {
         BasicProtocol protocol;
         BufferedInputStream bis;
 
-        System.out.println("读取到！");
-
         try{
             bis = new BufferedInputStream(inputStream);
 
@@ -61,8 +59,6 @@ public class SocketUtil {
             for(int i = 0; i < resultObj.length; i++){
                 result[i] = (byte)resultObj[i];
             }
-
-            System.out.println(new String(result));
 
             protocol = parseContentMsg(result, mode);
         } catch (IOException e) {

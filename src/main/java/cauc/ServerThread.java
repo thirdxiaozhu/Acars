@@ -3,6 +3,7 @@ package cauc;
 import Protocol.BasicProtocol;
 import Protocol.DownlinkProtocol;
 import Protocol.SocketUtil;
+import Protocol.Util;
 
 import javax.swing.*;
 import java.io.BufferedReader;
@@ -109,10 +110,9 @@ public class ServerThread implements Runnable{
                 }
 
                 if(inputStream != null){
-                    System.out.println("收到！");
-                    BasicProtocol receiveData = SocketUtil.readFromStream(inputStream, DownlinkProtocol.PROTOCOL_TYPE);
-                    if(receiveData != null){
-
+                    BasicProtocol receivedProtocol = SocketUtil.readFromStream(inputStream, DownlinkProtocol.PROTOCOL_TYPE);
+                    if(receivedProtocol != null){
+                        mainForm.messageListModel.addElement(receivedProtocol);
                     }
                 }
             }

@@ -183,4 +183,42 @@ public class Util {
 
         return sb.toString();
     }
+
+    /**
+     * 将被解析的ACARS格式报文打印
+     */
+    public static String getPlainText(BasicProtocol protocol){
+        byte[] text = protocol.getContentData();
+        StringBuffer sb = new StringBuffer(text.length);
+
+        for(int i = 4; i < text.length; i++){
+            if(i < 18 || i > text.length-5) {
+                sb.append(Config.TABLE_FOR_8BIT[text[i] & 0x0f][(text[i] >> 4) & 0x07]);
+            }else {
+                sb.append(Config.TABLE_FOR_6BIT[text[i] & 0x0f][(text[i] >> 4) & 0x07]);
+            }
+        }
+
+        return sb.toString();
+    }
+
+    /**
+     * 解析属性，并以8bit或6bit输出
+     */
+    public static String getAttributes(byte[] bytes, int mode){
+        StringBuffer sb = new StringBuffer();
+
+        for(int i = 0; i < bytes.length; i++){
+            if(mode == 0) {
+                if(bytes[i] == 21){
+                    continue;
+                }
+                sb.append(Config.TABLE_FOR_8BIT[bytes[i] & 0x0f][(bytes[i] >> 4) & 0x07]);
+            }else {
+                sb.append(Config.TABLE_FOR_6BIT[bytes[i] & 0x0f][(bytes[i] >> 4) & 0x07]);
+            }
+        }
+
+        return sb.toString();
+    }
 }

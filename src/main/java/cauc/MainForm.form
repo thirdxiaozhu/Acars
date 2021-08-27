@@ -2,7 +2,7 @@
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="cauc.MainForm">
   <grid id="27dc6" binding="mainPanel" layout-manager="GridBagLayout">
     <constraints>
-      <xy x="20" y="20" width="902" height="573"/>
+      <xy x="20" y="20" width="1087" height="573"/>
     </constraints>
     <properties/>
     <border type="none"/>
