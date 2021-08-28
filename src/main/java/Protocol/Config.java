@@ -2,7 +2,7 @@ package Protocol;
 
 public class Config {
     public static String[][] TABLE_FOR_8BIT = {
-            {"<NUL>", "<DLE>", "SP", "0", "@", "P", "`", "p"},
+            {"<NUL>", "<DLE>", " ", "0", "@", "P", "`", "p"},
             {"<SOH>", "<DC1>", "!", "1", "A", "Q", "a", "q"},
             {"<STX>", "<DC2>", "\"", "2", "B", "R", "b", "r"},
             {"<ETX>", "<DC3>", "#", "3", "C", "S", "c", "s"},
@@ -21,7 +21,7 @@ public class Config {
     };
 
     public static String[][] TABLE_FOR_6BIT = {
-            {"SP", "0", "@", "P"},
+            {" ", "0", "@", "P"},
             {"!", "1", "A", "Q"},
             {"\"", "2", "B", "R"},
             {"#", "3", "C", "S"},

@@ -1,12 +1,16 @@
 package Protocol;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * @author jiaxv
+ * @date 21/08/28
  */
 public class Util {
 
@@ -43,8 +47,8 @@ public class Util {
 
     /**
      * 获取BSC码， 算法为CRC16-1021
-     * @param data_arr
-     * @return
+     * @param data_arr 需要进行BSC校验的字符数组
+     * @return 两个字符的字符数组
      */
     public static byte[] getCRC16(byte[] data_arr){
         int crc16 = 0x0;
@@ -61,6 +65,11 @@ public class Util {
         return res;
     }
 
+    /**
+     * 专门用来解析BSC
+     * @param i 16bit int
+     * @return 长度为2的字符数组
+     */
     public static byte[] int2ByteArrays(int i) {
         byte[] result = new byte[2];
         result[0] = (byte) (0xff & i);
@@ -153,6 +162,11 @@ public class Util {
         return result;
     }
 
+    /**
+     * 预览明文（由于是正文是直接填充未经载荷编码，故按照8bit解析）
+     * @param protocol
+     * @return
+     */
     public static String getUntreatedPlainText(Protocol protocol){
         byte[] text = protocol.getContentData();
         StringBuffer sb = new StringBuffer(text.length);
@@ -163,7 +177,7 @@ public class Util {
     }
 
     /**
-     * 获取明文,并将正文以6bit信息编码后的可读形式返回
+     * 获取明文,并将正文以6bit信息编码后的可读形式返回(用于预览密文)
      * @param
      * @return
      */
@@ -204,12 +218,15 @@ public class Util {
 
     /**
      * 解析属性，并以8bit或6bit输出
+     * @param
+     * @return 解析后按照字符串返回以填充textfield
      */
     public static String getAttributes(byte[] bytes, int mode){
         StringBuffer sb = new StringBuffer();
 
         for(int i = 0; i < bytes.length; i++){
             if(mode == 0) {
+                //<NAK> 00010101 (21)
                 if(bytes[i] == 21){
                     continue;
                 }
@@ -220,5 +237,22 @@ public class Util {
         }
 
         return sb.toString();
+    }
+
+    /**
+     * 获取DSP转发时间，mode为0时，获取的是带毫秒的时间，mode为0时，是ARINC620规定的“D:HH:MM”格式
+     * @param mode 0, 1
+     * @return
+     */
+    public static String getTime(int mode){
+        Date date = new Date();
+        SimpleDateFormat sdf;
+        if(mode == 0){
+            sdf = new SimpleDateFormat("HH:mm:ss:SSS");
+        }else{
+            sdf = new SimpleDateFormat("d:HH:mm");
+        }
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return sdf.format(date);
     }
 }

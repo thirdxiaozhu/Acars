@@ -1,14 +1,10 @@
 package Protocol;
 
 import javax.swing.*;
-import javax.xml.namespace.QName;
 import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
-import java.net.ProtocolException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-
 
 public class DownlinkProtocol extends BasicProtocol implements Protocol , Serializable {
     public static final int PROTOCOL_TYPE = 1;
@@ -20,6 +16,7 @@ public class DownlinkProtocol extends BasicProtocol implements Protocol , Serial
     private byte[] flightId;
 
     private byte[] text;
+    private byte[] freetext;
 
     @Override
     public int getLength(){
@@ -50,6 +47,10 @@ public class DownlinkProtocol extends BasicProtocol implements Protocol , Serial
         return text;
     }
 
+    public byte[] getFreeText(){
+        return freetext;
+    }
+
     @Override
     public void setTak(String tak){
         if(Util.regularMatch("[A-Za-z]{1}",tak) || "".equals(tak)){
@@ -71,14 +72,10 @@ public class DownlinkProtocol extends BasicProtocol implements Protocol , Serial
     @Override
     public byte[] getContentData(){
         byte[] base = super.getContentData();
-        byte[] msn = getMsn();
-        byte[] flightid = getFlightId();
         byte[] text = getText();
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream(getLength());
         baos.write(base,0,base.length);
-        //baos.write(msn,0,MSN_LEN);
-        //baos.write(flightid,0,ID_LEN);
         baos.write(text,0,text.length);
         ByteArrayOutputStream temp = baos;
         baos.write(setTail(temp),0,getTailLength());
@@ -112,18 +109,20 @@ public class DownlinkProtocol extends BasicProtocol implements Protocol , Serial
         return result;
     }
 
+    public byte[] parseFreeText(byte[] text){
+        byte[] result = new byte[text.length-10];
+        System.arraycopy(text, 10, result, 0, text.length-10);
+        return result;
+    }
+
     @Override
     public int parseContentData(byte[] data) throws Exception {
         int pos = super.parseContentData(data);
         text = Util.deLoadCode( CryptoUtil.deCrypt("1234", parseText(data, pos)));
         msn = parseMsn(text);
         flightId = parseFlightID(text);
-
-        //for(byte b: msn){
-        //    System.out.println(Integer.toBinaryString(b&0xff) + " " + Config.TABLE_FOR_6BIT[b & 0x0f][(b >> 4) & 0x07]);
-        //}
+        freetext = parseFreeText(text);
 
         return pos + text.length;
     }
-
 }

@@ -38,10 +38,16 @@ public class ServerThread implements Runnable{
         try {
             JOptionPane.showMessageDialog(mainForm.mainPanel, "有设备接入");
             System.out.println("有设备接入");
+
             receiveTask = new ReceiveTask();
             receiveTask.inputStream = new DataInputStream(socket.getInputStream());
             receiveTask.start();
             System.out.println("接受线程启动");
+
+            sendTask = new SendTask();
+            sendTask.outputStream = new DataOutputStream(socket.getOutputStream());
+            sendTask.start();
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -62,12 +68,13 @@ public class ServerThread implements Runnable{
         }
     }
 
-    public void addMessage(BasicProtocol data){
+    public void addRequest(BasicProtocol data){
         if(!isConnected()){
             return;
         }
-        dataQueue.offer(data);
+        dataQueue.add(data);
         toNotifyAll(dataQueue);
+        System.out.println("laili");
     }
 
     public void toWaitAll(Object obj){
@@ -125,19 +132,19 @@ public class ServerThread implements Runnable{
 
         @Override
         public void run() {
-            while(!isCancled){
-                if(!isConnected()){
+            while(!isCancled) {
+                if (!isConnected()) {
                     isCancled = true;
                     break;
                 }
-            }
 
-            BasicProtocol protocol = dataQueue.poll();
-            if(protocol == null){
-                toWaitAll(dataQueue);
-            }else if(outputStream != null){
-                synchronized (outputStream){
-                    SocketUtil.write2Stream(protocol ,outputStream);
+                BasicProtocol protocol = dataQueue.poll();
+                if (protocol == null) {
+                    toWaitAll(dataQueue);
+                } else if (outputStream != null) {
+                    synchronized (outputStream) {
+                        SocketUtil.write2Stream(protocol, outputStream);
+                    }
                 }
             }
 

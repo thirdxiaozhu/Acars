@@ -2,10 +2,6 @@ package Protocol;
 
 import javax.swing.*;
 import java.io.ByteArrayOutputStream;
-import java.net.ProtocolException;
-import java.nio.charset.StandardCharsets;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * @author jiaxv
@@ -29,6 +25,9 @@ public class BasicProtocol {
     private byte tak;
     private byte[] label;
     private byte dubi;
+
+    private String time;
+    private String date_time;
 
     public int getLength(){
         return SOH_LEN + MODE_LEN + ARN_LEN + TAK_LEN + LABEL_LEN + DUBI_LEN +
@@ -57,6 +56,7 @@ public class BasicProtocol {
             JOptionPane.showMessageDialog(null, "飞机注册号格式错误！");
         }
     }
+
     public byte[] getArn(){
         return arn;
     }
@@ -68,6 +68,7 @@ public class BasicProtocol {
             JOptionPane.showMessageDialog(null, "标签格式错误！");
         }
     }
+
     public byte[] getLabel(){
         return label;
     }
@@ -90,6 +91,13 @@ public class BasicProtocol {
         return dubi;
     }
 
+    public String getTime(){
+        return time;
+    }
+
+    public String getDateTime(){
+        return date_time;
+    }
 
     public byte[] setTail(ByteArrayOutputStream front){
 
@@ -168,12 +176,10 @@ public class BasicProtocol {
         tak = parseTak(data);
         label = parseLabel(data);
         dubi = parseDubi(data);
+        time = Util.getTime(0);
+        date_time = Util.getTime(1);
 
-        //for(byte b: label){
-        //    System.out.println(Integer.toBinaryString(b&0xff) + " " + Config.TABLE_FOR_8BIT[b & 0x0f][(b >> 4) & 0x07]);
-        //}
         return HEAD_LEN + SOH_LEN + MODE_LEN +
                 ARN_LEN + TAK_LEN + LABEL_LEN + DUBI_LEN + STX_LEN;
     }
-
 }

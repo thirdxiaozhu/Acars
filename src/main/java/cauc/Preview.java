@@ -20,7 +20,6 @@ public class Preview {
         UplinkProtocol plain = Message.uplinkPreview(mainForm, Message.PREVIEW);
         UplinkProtocol cipher = Message.uplinkPreview(mainForm, Message.UPLINK);
         CipherText.setText(Util.getCypherText(cipher));
-        //PlainText.setText(new String(plaintext));
         PlainText.setText(Util.getUntreatedPlainText(plain));
 
         AcceptBtn.addActionListener(new ActionListener() {

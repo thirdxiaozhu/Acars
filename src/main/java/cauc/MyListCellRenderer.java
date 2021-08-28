@@ -16,7 +16,10 @@ public class MyListCellRenderer extends DefaultListCellRenderer {
         JLabel label = (JLabel) super.getListCellRendererComponent(
                 list, value, index, isSelected, cellHasFocus);
 
-        label.setText(Util.getPlainText((BasicProtocol) value));
+        BasicProtocol protocol = (BasicProtocol)value;
+
+        //label.setText((BasicProtocol)value. + " " + Util.getPlainText((BasicProtocol) value));
+        label.setText(protocol.getTime() + " " + Util.getPlainText(protocol));
 
         label.setHorizontalTextPosition(JLabel.RIGHT);
         label.setFont(font);

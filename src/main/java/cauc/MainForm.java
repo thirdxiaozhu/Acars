@@ -2,6 +2,7 @@ package cauc;
 
 import Protocol.BasicProtocol;
 import Protocol.DownlinkProtocol;
+import Protocol.SmiLabelMap;
 import Protocol.Util;
 
 import javax.swing.*;
@@ -16,6 +17,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.io.IOException;
 
 public class MainForm {
     public JPanel mainPanel;
@@ -25,7 +27,6 @@ public class MainForm {
     public JTextField idInput;
     public JTextField dubiInput;
     public JTextField takInput;
-    public JTextField utcInput;
     public JTextField key;
     public JTextArea detail;
     public JTextArea text;
@@ -45,11 +46,15 @@ public class MainForm {
     private JButton preview;
     private JLabel stateLabel;
     private JButton noAckMessage;
+    private JLabel utcLabel;
     private ServerListener serverListener;
     public DefaultListModel<BasicProtocol> messageListModel;
+    private SmiLabelMap mapClass;
 
     public MainForm(){
+        mapClass = new SmiLabelMap();
         initPanel();
+        initList();
     }
 
     private void startServer(){
@@ -65,6 +70,8 @@ public class MainForm {
                     port.setEnabled(false);
                     startDSP.setEnabled(false);
                     closeDSP.setEnabled(true);
+                    sendMessage.setEnabled(true);
+                    preview.setEnabled(true);
                     stateLabel.setText("当前连接状态：已启动");
                     //#008000 ->纯绿色RGB
                     stateLabel.setForeground(Color.decode("#008000"));
@@ -82,10 +89,11 @@ public class MainForm {
     private void initPanel(){
         startDSP.setEnabled(false);
         closeDSP.setEnabled(false);
-        infoPanel.setBorder(BorderFactory.createEtchedBorder(0));
-
+        sendMessage.setEnabled(false);
+        preview.setEnabled(false);
         stateLabel.setForeground(Color.red);
-        initList();
+        detail.setBorder(BorderFactory.createEtchedBorder(0));
+        infoPanel.setBorder(BorderFactory.createEtchedBorder(0));
 
         port.getDocument().addDocumentListener(new DocumentListener() {
             @Override
@@ -119,7 +127,37 @@ public class MainForm {
             public void changedUpdate(DocumentEvent e) {}
         });
 
+        sendMessage.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(serverListener == null){
+                    JOptionPane.showMessageDialog(null, "尚未连接");
+                }else {
+                    System.out.println("来历");
+                    serverListener.addNewRequest(Message.uplinkSend(MainForm.this));
+                }
+            }
+        });
+
         startServer();
+
+        closeDSP.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    serverListener.closeConnection();
+                    closeDSP.setEnabled(false);
+                    startDSP.setEnabled(true);
+                    sendMessage.setEnabled(false);
+                    preview.setEnabled(false);
+                    stateLabel.setForeground(Color.red);
+                    stateLabel.setText("当前连接状态：未启动");
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+            }
+        });
+
         preview.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -143,6 +181,7 @@ public class MainForm {
     }
 
     private void initList(){
+        detail.setPreferredSize(new Dimension(200,100));
         messageListModel = new DefaultListModel<>();
         messageList.setModel(messageListModel);
         messageList.setCellRenderer(new MyListCellRenderer());
@@ -150,12 +189,26 @@ public class MainForm {
             @Override
             public void valueChanged(ListSelectionEvent e) {
                 DownlinkProtocol protocol = (DownlinkProtocol) messageList.getSelectedValue();
+                modeInput.setEditable(false);
+                arnInput.setEditable(false);
+                idInput.setEditable(false);
+
                 modeInput.setText(Util.getAttributes(new byte[]{protocol.getMode()}, 0));
                 arnInput.setText(Util.getAttributes(protocol.getArn(), 0));
-                labelInput.setText(Util.getAttributes(protocol.getLabel(), 0));
                 idInput.setText(Util.getAttributes(protocol.getFlightId(), 1));
-                dubiInput.setText(Util.getAttributes(new byte[]{protocol.getDubi()}, 0));
                 takInput.setText(Util.getAttributes(new byte[]{protocol.getTak()}, 0));
+                utcLabel.setText(protocol.getTime());
+                //labelInput.setText(Util.getAttributes(protocol.getLabel(), 0));
+                //dubiInput.setText(Util.getAttributes(new byte[]{protocol.getDubi()}, 0));
+
+                detail.setText(
+                        "QU" + " xxxxxxx\n" +
+                        ".BSJXXXX " + protocol.getDateTime() + "\n" +
+                        mapClass.LABEL_SMI_DOWN.get(Util.getAttributes(protocol.getLabel(), 0)) + "\n" +
+                        "FI " + Util.getAttributes(protocol.getFlightId(), 1) + "/AN " + Util.getAttributes(protocol.getArn(), 0) + "\n" +
+                        "DT BJS LOCAL " + protocol.getDateTime() + "M01A\n" +
+                        " - " + Util.getAttributes(protocol.getFreeText(), 1)
+                );
             }
         });
     }
