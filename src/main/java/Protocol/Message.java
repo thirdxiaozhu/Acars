@@ -1,6 +1,5 @@
 package Protocol;
 
-import Protocol.*;
 import cauc.MainForm;
 
 import javax.swing.*;
