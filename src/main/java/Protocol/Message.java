@@ -26,9 +26,13 @@ public class Message {
             }else{
                 String text = mainForm.text.getText();
                 StringBuilder sb = new StringBuilder(text);
-                int tag = 0;
+                if(text.length() > 220){
+                    JOptionPane.showMessageDialog(mainForm.mainPanel, "正文长度超过220个字符！");
+                    return null;
+                }
 
                 //逐个位置替换成6bit
+                int tag = 0;
                 for(int i = 0 ; i < text.length(); i++){
                     if(text.charAt(i) < 32){
                         JOptionPane.showMessageDialog(mainForm.mainPanel, "存在不可修正非法字符！");
@@ -68,9 +72,14 @@ public class Message {
                 protocol.setText(text.getBytes());
             }else{
                 StringBuilder sb = new StringBuilder(text);
-                int tag = 0;
+
+                if(text.length() > 220){
+                    JOptionPane.showMessageDialog(mainForm.mainPanel, "正文长度超过220个字符！");
+                    return null;
+                }
 
                 //逐个位置替换成6bit
+                int tag = 0;
                 for(int i = 0 ; i < text.length(); i++){
                     if(text.charAt(i) < 32){
                         JOptionPane.showMessageDialog(mainForm.mainPanel, "存在不可修正非法字符！");

@@ -57,6 +57,7 @@ public class MainForm {
         closeDSP.setEnabled(false);
         sendMessage.setEnabled(false);
         preview.setEnabled(false);
+        detail.setLineWrap(true);
 
         stateLabel.setForeground(Color.red);
         detail.setBorder(BorderFactory.createEtchedBorder(0));
