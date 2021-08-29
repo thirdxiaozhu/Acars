@@ -1,4 +1,4 @@
-package cauc;
+package Protocol;
 
 import Protocol.BasicProtocol;
 import Protocol.Util;
@@ -18,7 +18,6 @@ public class MyListCellRenderer extends DefaultListCellRenderer {
 
         BasicProtocol protocol = (BasicProtocol)value;
 
-        //label.setText((BasicProtocol)value. + " " + Util.getPlainText((BasicProtocol) value));
         label.setText(protocol.getTime() + " " + Util.getPlainText(protocol));
 
         label.setHorizontalTextPosition(JLabel.RIGHT);

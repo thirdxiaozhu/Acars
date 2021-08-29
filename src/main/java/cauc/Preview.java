@@ -1,5 +1,6 @@
 package cauc;
 
+import Protocol.Message;
 import Protocol.UplinkProtocol;
 import Protocol.Util;
 
@@ -17,8 +18,8 @@ public class Preview {
 
     public Preview(JFrame frame, MainForm mainForm) {
         this.mainForm = mainForm;
-        UplinkProtocol plain = Message.uplinkPreview(mainForm, Message.PREVIEW);
-        UplinkProtocol cipher = Message.uplinkPreview(mainForm, Message.UPLINK);
+        UplinkProtocol plain = Message.uplinkMessage(mainForm, Message.PREVIEW);
+        UplinkProtocol cipher = Message.uplinkMessage(mainForm, Message.ENCRYPT);
         CipherText.setText(Util.getCypherText(cipher));
         PlainText.setText(Util.getUntreatedPlainText(plain));
 

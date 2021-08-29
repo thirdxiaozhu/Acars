@@ -103,8 +103,6 @@ public class BasicProtocol {
 
         byte[] suffix = {Util.indexto8bit(7,1)};
 
-        //front.write(suffix, 0, SUFFIX_LEN);
-
         byte[] bcs = Util.getCRC16(front.toByteArray());
         byte[] bcssuf = {Util.indexto8bit(15,7)};
         byte[] tail = {Util.indexto8bit(0,1)};
@@ -117,7 +115,10 @@ public class BasicProtocol {
         return baos.toByteArray();
     }
 
-
+    /**
+     * 填充报文内容
+     * @return
+     */
     public byte[] getContentData(){
         byte[] head = {Util.indexto8bit(11,2),Util.indexto8bit(10,2),
                 Util.indexto8bit(6,1),Util.indexto8bit(6,1)};
@@ -170,6 +171,12 @@ public class BasicProtocol {
         return data[HEAD_LEN + SOH_LEN + MODE_LEN + ARN_LEN + TAK_LEN + LABEL_LEN];
     }
 
+    /**
+     * 解析报文内容
+     * @param data
+     * @return
+     * @throws Exception
+     */
     public int parseContentData(byte[] data) throws Exception {
         mode = parseMode(data);
         arn = parseArn(data);

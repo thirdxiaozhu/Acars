@@ -1,9 +1,6 @@
 package cauc;
 
-import Protocol.BasicProtocol;
-import Protocol.DownlinkProtocol;
-import Protocol.SmiLabelMap;
-import Protocol.Util;
+import Protocol.*;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -15,8 +12,6 @@ import javax.swing.text.Document;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.io.IOException;
 
 public class MainForm {
@@ -39,12 +34,12 @@ public class MainForm {
     private JLabel utc;
     private JPanel infoPanel;
     public JTextField port;
-    private JButton startDSP;
-    private JButton sendMessage;
+    public JButton startDSP;
+    public JButton sendMessage;
+    public JButton closeDSP;
+    public JButton preview;
+    public JLabel stateLabel;
     private JList messageList;
-    private JButton closeDSP;
-    private JButton preview;
-    private JLabel stateLabel;
     private JButton noAckMessage;
     private JLabel utcLabel;
     private ServerListener serverListener;
@@ -57,40 +52,12 @@ public class MainForm {
         initList();
     }
 
-    private void startServer(){
-        serverListener = new ServerListener(this);
-        startDSP.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int port2int = Integer.parseInt(port.getText());
-
-                if(port2int > 65536 || port2int < 0){
-                    JOptionPane.showMessageDialog(null, "端口输入错误");
-                }else{
-                    port.setEnabled(false);
-                    startDSP.setEnabled(false);
-                    closeDSP.setEnabled(true);
-                    sendMessage.setEnabled(true);
-                    preview.setEnabled(true);
-                    stateLabel.setText("当前连接状态：已启动");
-                    //#008000 ->纯绿色RGB
-                    stateLabel.setForeground(Color.decode("#008000"));
-                    new Thread(){
-                        @Override
-                        public void run() {
-                            serverListener.start(Integer.parseInt(port.getText()));
-                        }
-                    }.start();
-                }
-            }
-        });
-    }
-
     private void initPanel(){
         startDSP.setEnabled(false);
         closeDSP.setEnabled(false);
         sendMessage.setEnabled(false);
         preview.setEnabled(false);
+
         stateLabel.setForeground(Color.red);
         detail.setBorder(BorderFactory.createEtchedBorder(0));
         infoPanel.setBorder(BorderFactory.createEtchedBorder(0));
@@ -127,25 +94,27 @@ public class MainForm {
             public void changedUpdate(DocumentEvent e) {}
         });
 
+        //发送按钮监听器
         sendMessage.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if(serverListener == null){
                     JOptionPane.showMessageDialog(null, "尚未连接");
                 }else {
-                    System.out.println("来历");
-                    serverListener.addNewRequest(Message.uplinkSend(MainForm.this));
+                    serverListener.addNewRequest(Message.uplinkMessage(MainForm.this, Message.ENCRYPT));
                 }
             }
         });
 
         startServer();
 
+        //关闭按钮监听器
         closeDSP.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
                     serverListener.closeConnection();
+                    port.setEnabled(true);
                     closeDSP.setEnabled(false);
                     startDSP.setEnabled(true);
                     sendMessage.setEnabled(false);
@@ -180,6 +149,9 @@ public class MainForm {
         frame.setResizable(false);
     }
 
+    /**
+     * 设置报文列表基本内容及触发器
+     */
     private void initList(){
         detail.setPreferredSize(new Dimension(200,100));
         messageListModel = new DefaultListModel<>();
@@ -198,17 +170,39 @@ public class MainForm {
                 idInput.setText(Util.getAttributes(protocol.getFlightId(), 1));
                 takInput.setText(Util.getAttributes(new byte[]{protocol.getTak()}, 0));
                 utcLabel.setText(protocol.getTime());
-                //labelInput.setText(Util.getAttributes(protocol.getLabel(), 0));
-                //dubiInput.setText(Util.getAttributes(new byte[]{protocol.getDubi()}, 0));
 
                 detail.setText(
                         "QU" + " xxxxxxx\n" +
                         ".BSJXXXX " + protocol.getDateTime() + "\n" +
                         mapClass.LABEL_SMI_DOWN.get(Util.getAttributes(protocol.getLabel(), 0)) + "\n" +
                         "FI " + Util.getAttributes(protocol.getFlightId(), 1) + "/AN " + Util.getAttributes(protocol.getArn(), 0) + "\n" +
-                        "DT BJS LOCAL " + protocol.getDateTime() + "M01A\n" +
+                        "DT BJS LOCAL " + protocol.getDateTime() + " M01A\n" +
                         " - " + Util.getAttributes(protocol.getFreeText(), 1)
                 );
+            }
+        });
+    }
+
+    /**
+     * 检查端口是否合法并启动服务
+     */
+    private void startServer(){
+        serverListener = new ServerListener(this);
+        startDSP.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int port2int = Integer.parseInt(port.getText());
+
+                if(port2int > 65536 || port2int < 0){
+                    JOptionPane.showMessageDialog(null, "端口输入错误");
+                }else{
+                    new Thread(){
+                        @Override
+                        public void run() {
+                            serverListener.start(Integer.parseInt(port.getText()));
+                        }
+                    }.start();
+                }
             }
         });
     }

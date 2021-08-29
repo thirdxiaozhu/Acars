@@ -1,6 +1,8 @@
 package Protocol;
 
+import javax.swing.*;
 import java.io.*;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -50,7 +52,7 @@ public class SocketUtil {
      * @return 返回解析完成的报文
      */
     public static BasicProtocol readFromStream(InputStream inputStream, int mode){
-        BasicProtocol protocol;
+        BasicProtocol protocol = null;
         BufferedInputStream bis;
 
         try{
@@ -77,6 +79,8 @@ public class SocketUtil {
             }
 
             protocol = parseContentMsg(result, mode);
+        }catch (SocketException e){
+            JOptionPane.showMessageDialog(null, "连接已关闭");
         } catch (IOException e) {
             e.printStackTrace();
             return null;
@@ -97,7 +101,20 @@ public class SocketUtil {
         try{
             bos.write(bufferData);
             bos.flush();
-            System.out.println("写入");
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 关闭输入流
+     * @param is
+     */
+    public static void closeInputStream(InputStream is){
+        try{
+            if(is != null){
+                is.close();
+            }
         }catch (IOException e){
             e.printStackTrace();
         }

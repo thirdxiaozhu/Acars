@@ -4,10 +4,9 @@ import Protocol.DownlinkProtocol;
 import Protocol.UplinkProtocol;
 
 import javax.swing.*;
+import java.awt.*;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.*;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -27,6 +26,16 @@ public class ServerListener{
         try{
             serverSocket = new ServerSocket(port);
             isStart = true;
+
+            mainForm.port.setEnabled(false);
+            mainForm.startDSP.setEnabled(false);
+            mainForm.closeDSP.setEnabled(true);
+            mainForm.sendMessage.setEnabled(true);
+            mainForm.preview.setEnabled(true);
+            mainForm.stateLabel.setText("当前连接状态：已启动");
+            //#008000 ->纯绿色RGB
+            mainForm.stateLabel.setForeground(Color.decode("#008000"));
+
             System.out.println(String.format("启动成功！端口号%d",port));
             while(isStart){
                 Socket socket = serverSocket.accept();
@@ -35,8 +44,12 @@ public class ServerListener{
                     executorService.execute(serverThread);
                 }
             }
-
             serverSocket.close();
+        } catch (BindException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "端口被占用，请重试");
+        }catch (SocketException e){
+            JOptionPane.showMessageDialog(null, "连接终止");
         } catch (IOException e) {
             e.printStackTrace();
         } finally {

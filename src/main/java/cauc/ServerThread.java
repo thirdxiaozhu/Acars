@@ -39,11 +39,12 @@ public class ServerThread implements Runnable{
             JOptionPane.showMessageDialog(mainForm.mainPanel, "有设备接入");
             System.out.println("有设备接入");
 
+            //开始接收线程
             receiveTask = new ReceiveTask();
             receiveTask.inputStream = new DataInputStream(socket.getInputStream());
             receiveTask.start();
-            System.out.println("接受线程启动");
 
+            //开始发送线程
             sendTask = new SendTask();
             sendTask.outputStream = new DataOutputStream(socket.getOutputStream());
             sendTask.start();
@@ -54,6 +55,16 @@ public class ServerThread implements Runnable{
     }
 
     public void stop(){
+        if (receiveTask != null) {
+            receiveTask.isCancle = true;
+            receiveTask.interrupt();
+            if (receiveTask.inputStream != null) {
+                SocketUtil.closeInputStream(receiveTask.inputStream);
+                receiveTask.inputStream = null;
+            }
+            receiveTask = null;
+        }
+
         if(sendTask != null){
             sendTask.isCancled = true;
             sendTask.interrupt();
@@ -68,6 +79,10 @@ public class ServerThread implements Runnable{
         }
     }
 
+    /**
+     * 向发送队列中添加报文并激活
+     * @param data
+     */
     public void addRequest(BasicProtocol data){
         if(!isConnected()){
             return;
@@ -104,6 +119,9 @@ public class ServerThread implements Runnable{
         return true;
     }
 
+    /**
+     * 接受线程
+     */
     public class ReceiveTask extends Thread{
         private DataInputStream inputStream;
         private boolean isCancle;
@@ -126,6 +144,9 @@ public class ServerThread implements Runnable{
         }
     }
 
+    /**
+     * 发送线程
+     */
     public class SendTask extends Thread{
         private DataOutputStream outputStream;
         private boolean isCancled;
