@@ -9,10 +9,10 @@
 1.更新README  
 2.添加发送非应答报文功能
 
-###安装项目
+### 安装项目
 >git clone https://github.com/thirdxiaozhu/Acars  
 使用 IDEA 打开
-###工作流程
+### 工作流程
 1. 输入地面站DSP地址以及开放的端口
 2. 模式字符： “2” (A模式)
 3. 飞机注册号：不超过7位，不足7位则前面填充“.”
@@ -25,13 +25,13 @@
 10. 当接收到地面站DSP转发的报文后，报文列表将添加该报文，点击报文后在下方可以看到ARINC620格式的报文
 11. 选择下行报文进行应答或发送非应答报文
 
-###工作原理
+### 工作原理
 同CMU
 
-###规划
+### 规划
 同CMU
 
-###相关项目
+### 相关项目  
 [机载CMU](https://github.com/thirdxiaozhu/Acars_CMU)  
 [L2P_Transporter](https://github.com/thirdxiaozhu/L2PTransporter_Swing)
 
