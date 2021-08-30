@@ -134,6 +134,25 @@ public class MainForm {
                 callPreviewLayout();
             }
         });
+
+        /**
+         * 非应答报文监听器
+         */
+        noAckMessage.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                modeInput.setText("");
+                arnInput.setText("");
+                labelInput.setText("");
+                idInput.setText("");
+                dubiInput.setText("");
+                takInput.setText("");
+                key.setText("");
+                text.setText("");
+                detail.setText("");
+                utcLabel.setText("");
+            }
+        });
     }
 
     private void callPreviewLayout() {
