@@ -3,17 +3,12 @@ package cauc;
 import Protocol.BasicProtocol;
 import Protocol.DownlinkProtocol;
 import Protocol.SocketUtil;
-import Protocol.Util;
 
 import javax.swing.*;
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ServerThread implements Runnable{
@@ -27,10 +22,19 @@ public class ServerThread implements Runnable{
     private volatile ConcurrentLinkedQueue<BasicProtocol> dataQueue = new ConcurrentLinkedQueue<>();
     private static ConcurrentHashMap<String, Socket> onLineCMU = new ConcurrentHashMap<>();
 
-    public ServerThread(Socket socket, MainForm mainForm){
+    public ServerThread(Socket socket, MainForm mainForm) throws IOException {
         this.socket = socket;
         this.mainForm = mainForm;
         this.userIP = socket.getInetAddress().getHostAddress();
+
+        ObjectOutputStream oos = new ObjectOutputStream(this.socket.getOutputStream());
+
+        oos.writeObject(mainForm.CMUDialog.keyPair.getPrivate());
+        oos.flush();
+        oos.writeObject(mainForm.DSPDialog.certificate);
+        oos.flush();
+        oos.writeObject(mainForm.passwd);
+        oos.flush();
     }
 
     @Override
@@ -89,7 +93,6 @@ public class ServerThread implements Runnable{
         }
         dataQueue.add(data);
         toNotifyAll(dataQueue);
-        System.out.println("laili");
     }
 
     public void toWaitAll(Object obj){
@@ -135,7 +138,7 @@ public class ServerThread implements Runnable{
                 }
 
                 if(inputStream != null){
-                    BasicProtocol receivedProtocol = SocketUtil.readFromStream(inputStream, DownlinkProtocol.PROTOCOL_TYPE);
+                    BasicProtocol receivedProtocol = SocketUtil.readFromStream(mainForm.CMUDialog.certificate, mainForm.passwd, inputStream, DownlinkProtocol.PROTOCOL_TYPE);
                     if(receivedProtocol != null){
                         mainForm.messageListModel.addElement(receivedProtocol);
                     }

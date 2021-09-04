@@ -1,5 +1,8 @@
 package Protocol;
 
+/**
+ * @author jiaxv
+ */
 public class Config {
     public static String[][] TABLE_FOR_8BIT = {
             {"<NUL>", "<DLE>", " ", "0", "@", "P", "`", "p"},

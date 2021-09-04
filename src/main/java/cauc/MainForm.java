@@ -14,6 +14,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 
+/**
+ * @author jiaxv
+ */
 public class MainForm {
     public JPanel mainPanel;
     public JTextField modeInput;
@@ -42,13 +45,21 @@ public class MainForm {
     private JList messageList;
     private JButton noAckMessage;
     private JLabel utcLabel;
+    private JButton DSPButton;
+    private JButton CMUButton;
+    private JPanel SignPanel;
+    private JLabel signState;
+    private JTextField passwdField;
+    private JButton passwdbtn;
     private ServerListener serverListener;
     public DefaultListModel<BasicProtocol> messageListModel;
-    private SmiLabelMap mapClass;
+    public DNDialog DSPDialog;
+    public DNDialog CMUDialog;
+    public String passwd;
 
     public MainForm(){
-        mapClass = new SmiLabelMap();
         initPanel();
+        initSignPanel();
         initList();
     }
 
@@ -194,7 +205,7 @@ public class MainForm {
                 detail.setText(
                         "QU" + " xxxxxxx\n" +
                         ".BSJXXXX " + protocol.getDateTime() + "\n" +
-                        mapClass.LABEL_SMI_DOWN.get(Util.getAttributes(protocol.getLabel(), 0)) + "\n" +
+                        SmiLabelMap.getInstance().LABEL_SMI_DOWN.get(Util.getAttributes(protocol.getLabel(), 0)) + "\n" +
                         "FI " + Util.getAttributes(protocol.getFlightId(), 1) + "/AN " + Util.getAttributes(protocol.getArn(), 0) + "\n" +
                         "DT BJS LOCAL " + protocol.getDateTime() + " M01A\n" +
                         " - " + Util.getAttributes(protocol.getFreeText(), 1)
@@ -227,4 +238,52 @@ public class MainForm {
         });
     }
 
+    public void initSignPanel(){
+        SignPanel.setBorder(BorderFactory.createEtchedBorder(0));
+        signState.setForeground(Color.red);
+        DSPButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFrame frame = new JFrame("地面站信息");
+                DSPDialog = new DNDialog(frame, SelfCertificate.DSP);
+                DSPDialog.Title.setText("地面站信息");
+                //构建窗口, this是父窗口，传入子窗口以便传值 , 同时要传入子窗口自身,以保证实现窗口关闭功能
+                frame.setContentPane(DSPDialog.SignInfoPanel);
+                frame.pack();
+                frame.setVisible(true);
+                frame.setLayout(null);
+                //在屏幕中间显示
+                frame.setLocation(550 , 350);
+
+                //禁止调整大小
+                frame.setResizable(false);
+            }
+        });
+        CMUButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFrame frame = new JFrame("航空器信息");
+                CMUDialog = new DNDialog(frame, SelfCertificate.CMU);
+                CMUDialog.Title.setText("航空器信息");
+                //构建窗口, this是父窗口，传入子窗口以便传值 , 同时要传入子窗口自身,以保证实现窗口关闭功能
+                frame.setContentPane(CMUDialog.SignInfoPanel);
+                frame.pack();
+                frame.setVisible(true);
+                frame.setLayout(null);
+                //在屏幕中间显示
+                frame.setLocation(550 , 350);
+
+                //禁止调整大小
+                frame.setResizable(false);
+            }
+        });
+
+        passwdbtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                passwd = passwdField.getText();
+                System.out.println(passwd);
+            }
+        });
+    }
 }

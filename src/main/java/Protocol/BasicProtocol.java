@@ -2,6 +2,7 @@ package Protocol;
 
 import javax.swing.*;
 import java.io.ByteArrayOutputStream;
+import java.security.cert.Certificate;
 
 /**
  * @author jiaxv
@@ -177,7 +178,7 @@ public class BasicProtocol {
      * @return
      * @throws Exception
      */
-    public int parseContentData(byte[] data) throws Exception {
+    public int parseContentData(Certificate certificate, String passwd, byte[] data) throws Exception {
         mode = parseMode(data);
         arn = parseArn(data);
         tak = parseTak(data);

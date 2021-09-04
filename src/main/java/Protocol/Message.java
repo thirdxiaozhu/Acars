@@ -10,7 +10,15 @@ import javax.swing.*;
 public class Message {
     public static final int PREVIEW = 0;
     public static final int ENCRYPT = 1;
+    public static final int CIPHER_LENGTH = 1;
+    public static final int SIGN_LENGTH = 1;
 
+    /**
+     * 生成上行报文
+     * @param mainForm
+     * @param mode
+     * @return
+     */
     public static UplinkProtocol uplinkMessage(MainForm mainForm, int mode){
         UplinkProtocol protocol = new UplinkProtocol();
         try {
@@ -45,8 +53,20 @@ public class Message {
                 if(tag == 1){
                     JOptionPane.showMessageDialog(mainForm.mainPanel, "存在可以修正非法字符，已自动修正！");
                 }
-                byte[] cryptedtext = CryptoUtil.enCrypt(mainForm.key.getText(), Util.loadCode(sb.toString().getBytes()));
-                protocol.setText(cryptedtext);
+
+                //明文
+                byte[] plainText = sb.toString().getBytes();
+                //密文
+                byte[] cryptedText = CryptoUtil.enCrypt(mainForm.passwd, Util.loadCode(plainText));
+                //对密文的签名
+                byte[] signValue = CryptoUtil.signMessage(mainForm.DSPDialog.keyPair.getPrivate(), cryptedText, cryptedText.length);
+                //密文长度（1byte）+ 签名值长度（1byte）+ 密文 + 明文 组成正文
+                byte[] result = new byte[cryptedText.length + signValue.length + CIPHER_LENGTH + SIGN_LENGTH];
+                System.arraycopy(new byte[]{(byte) cryptedText.length, (byte) signValue.length}, 0, result, 0, CIPHER_LENGTH + SIGN_LENGTH);
+                System.arraycopy(cryptedText, 0, result, CIPHER_LENGTH + SIGN_LENGTH, cryptedText.length);
+                System.arraycopy(signValue, 0, result, CIPHER_LENGTH + SIGN_LENGTH + cryptedText.length, signValue.length);
+
+                protocol.setText(result);
             }
         }catch (Exception e){
             JOptionPane.showMessageDialog(mainForm.mainPanel, "请按照格式输入内容");
@@ -56,6 +76,12 @@ public class Message {
         return protocol;
     };
 
+    /**
+     * 生成下行报文
+     * @param mainForm
+     * @param mode
+     * @return
+     */
     public static DownlinkProtocol downlinkMessage(MainForm mainForm, int mode){
         DownlinkProtocol protocol = new DownlinkProtocol();
         try {
@@ -92,8 +118,20 @@ public class Message {
                 if(tag == 1){
                     JOptionPane.showMessageDialog(mainForm.mainPanel, "存在可以修正非法字符，已自动修正！");
                 }
-                byte[] cryptedtext = CryptoUtil.enCrypt(mainForm.key.getText(), Util.loadCode(sb.toString().getBytes()));
-                protocol.setText(cryptedtext);
+
+                //明文
+                byte[] plainText = sb.toString().getBytes();
+                //密文
+                byte[] cryptedText = CryptoUtil.enCrypt(mainForm.passwd, Util.loadCode(plainText));
+                //对密文的签名
+                byte[] signValue = CryptoUtil.signMessage(mainForm.DSPDialog.keyPair.getPrivate(), cryptedText, cryptedText.length);
+                //密文长度（1byte）+ 签名值长度（1byte）+ 密文 + 明文 组成正文
+                byte[] result = new byte[cryptedText.length + signValue.length + CIPHER_LENGTH + SIGN_LENGTH];
+                System.arraycopy(new byte[]{(byte) cryptedText.length, (byte) signValue.length}, 0, result, 0, CIPHER_LENGTH + SIGN_LENGTH);
+                System.arraycopy(cryptedText, 0, result, CIPHER_LENGTH + SIGN_LENGTH, cryptedText.length);
+                System.arraycopy(signValue, 0, result, CIPHER_LENGTH + SIGN_LENGTH + cryptedText.length, signValue.length);
+
+                protocol.setText(result);
             }
         }catch (Exception e){
             JOptionPane.showMessageDialog(mainForm.mainPanel, "请按照格式输入内容");

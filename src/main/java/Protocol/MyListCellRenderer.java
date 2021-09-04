@@ -1,11 +1,7 @@
 package Protocol;
 
-import Protocol.BasicProtocol;
-import Protocol.Util;
-
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 
 public class MyListCellRenderer extends DefaultListCellRenderer {
 

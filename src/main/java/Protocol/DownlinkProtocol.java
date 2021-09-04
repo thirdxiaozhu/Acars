@@ -3,9 +3,13 @@ package Protocol;
 import javax.swing.*;
 import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
+import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author jiaxv
+ */
 public class DownlinkProtocol extends BasicProtocol implements Protocol , Serializable {
     public static final int PROTOCOL_TYPE = 1;
 
@@ -116,13 +120,23 @@ public class DownlinkProtocol extends BasicProtocol implements Protocol , Serial
     }
 
     @Override
-    public int parseContentData(byte[] data) throws Exception {
-        int pos = super.parseContentData(data);
-        text = Util.deLoadCode( CryptoUtil.deCrypt("1234", parseText(data, pos)));
+    public int parseContentData(Certificate certificate, String passwd, byte[] data) throws Exception {
+        int pos = super.parseContentData(certificate, passwd, data);
+
+        byte[] message = parseText(data, pos);
+        byte[] cypherText = new byte[(int)message[0]];
+        byte[] signValue = new byte[(int)message[1]];
+        System.arraycopy(message, 2, cypherText, 0, cypherText.length);
+        System.arraycopy(message, 2+cypherText.length, signValue, 0, signValue.length);
+        if(CryptoUtil.verifyMessage(certificate, cypherText, signValue)){
+            text = Util.deLoadCode(CryptoUtil.deCrypt(passwd, cypherText));
+        }else {
+            JOptionPane.showMessageDialog(null, "该消息已被篡改！");
+            text = new byte[]{};
+        }
         msn = parseMsn(text);
         flightId = parseFlightID(text);
         freetext = parseFreeText(text);
-
         return pos + text.length;
     }
 }

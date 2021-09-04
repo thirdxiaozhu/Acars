@@ -3,9 +3,8 @@ package Protocol;
 import javax.swing.*;
 import java.io.*;
 import java.net.SocketException;
-import java.util.ArrayList;
+import java.security.cert.Certificate;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,17 +25,15 @@ public class SocketUtil {
      * @param mode 模式
      * @return
      */
-    public static BasicProtocol parseContentMsg(byte[] data, int mode){
-        //String className = msgImp.get(mode);
+    public static BasicProtocol parseContentMsg(Certificate certificate, String passwd, byte[] data, int mode){
         BasicProtocol basicProtocol;
         try{
-            //basicProtocol = (BasicProtocol) Class.forName(className).newInstance();
             if(mode == DownlinkProtocol.PROTOCOL_TYPE){
                 basicProtocol = new DownlinkProtocol();
             }else{
                 basicProtocol = new UplinkProtocol();
             }
-            basicProtocol.parseContentData(data);
+            basicProtocol.parseContentData(certificate, passwd, data);
         } catch (Exception e) {
             basicProtocol = null;
             e.printStackTrace();
@@ -51,7 +48,7 @@ public class SocketUtil {
      * @param mode 模式
      * @return 返回解析完成的报文
      */
-    public static BasicProtocol readFromStream(InputStream inputStream, int mode){
+    public static BasicProtocol readFromStream(Certificate certificate, String passwd, InputStream inputStream, int mode){
         BasicProtocol protocol = null;
         BufferedInputStream bis;
 
@@ -63,22 +60,7 @@ public class SocketUtil {
             //由于ACARS报文长度不会超过250，所以一次性读取250个字节
             bis.read(content, len, 250);
 
-            //将多余的空元素去除（由于无法直接比较byte和null,那么就和0比较）
-            List<Byte> resultList = new ArrayList<>(250);
-            for(byte b: content){
-                if((b & 0xff) == 0){
-                    break;
-                }
-                resultList.add(b);
-            }
-            //Object数组转byte[]数组
-            Object[] resultObj = resultList.toArray();
-            byte[] result = new byte[resultObj.length];
-            for(int i = 0; i < resultObj.length; i++){
-                result[i] = (byte)resultObj[i];
-            }
-
-            protocol = parseContentMsg(result, mode);
+            protocol = parseContentMsg(certificate, passwd, content, mode);
         }catch (SocketException e){
             JOptionPane.showMessageDialog(null, "连接已关闭");
         } catch (IOException e) {

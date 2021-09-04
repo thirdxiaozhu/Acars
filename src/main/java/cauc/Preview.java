@@ -8,6 +8,9 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+/**
+ * @author jiaxv
+ */
 public class Preview {
     public JPanel previewPanel;
     private JTextArea PlainText;

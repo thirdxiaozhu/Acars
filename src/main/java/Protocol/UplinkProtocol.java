@@ -2,7 +2,13 @@ package Protocol;
 
 import javax.swing.*;
 import java.io.ByteArrayOutputStream;
+import java.security.cert.Certificate;
+import java.util.ArrayList;
+import java.util.List;
 
+/**
+ * @author jiaxv
+ */
 public class UplinkProtocol extends BasicProtocol implements Protocol{
 
     public static final int PROTOCOL_TYPE = 0;
@@ -52,5 +58,36 @@ public class UplinkProtocol extends BasicProtocol implements Protocol{
         baos.write(setTail(temp),0,getTailLength());
 
         return baos.toByteArray();
+    }
+
+    public byte[] parseText(byte[] data, int pos){
+        List<Byte> resultList = new ArrayList<>();
+        for(int i = 0; i < data.length - pos - 4; i++){
+            resultList.add(data[pos+i]);
+        }
+
+        Object[] resultObj = resultList.toArray();
+        byte[] result = new byte[resultObj.length];
+        for(int i = 0; i < resultObj.length; i++){
+            result[i] = (byte)resultObj[i];
+        }
+        return result;
+    }
+
+    @Override
+    public int parseContentData(Certificate certificate, String passwd, byte[] data) throws Exception {
+        int pos = super.parseContentData(certificate, passwd, data);
+        byte[] message = parseText(data, pos);
+        byte[] cypherText = new byte[(int)message[0]];
+        byte[] signValue = new byte[(int)message[1]];
+        System.arraycopy(message, 2, cypherText, 0, cypherText.length);
+        System.arraycopy(message, 2+cypherText.length, signValue, 0, signValue.length);
+        if(CryptoUtil.verifyMessage(certificate, cypherText, signValue)){
+            text = Util.deLoadCode(CryptoUtil.deCrypt(passwd, cypherText));
+        }else {
+            JOptionPane.showMessageDialog(null, "该消息已被篡改！");
+            text = new byte[]{};
+        }
+        return pos + text.length;
     }
 }

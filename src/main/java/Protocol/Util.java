@@ -240,7 +240,7 @@ public class Util {
     }
 
     /**
-     * 获取DSP转发时间，mode为0时，获取的是带毫秒的时间，mode为0时，是ARINC620规定的“D:HH:MM”格式
+     * 获取DSP转发时间，mode为0时，获取的是带毫秒的时间，mode为1时，是ARINC620规定的“D:HH:MM”格式
      * @param mode 0, 1
      * @return
      */

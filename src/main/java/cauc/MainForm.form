@@ -2,7 +2,7 @@
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="cauc.MainForm">
   <grid id="27dc6" binding="mainPanel" layout-manager="GridBagLayout">
     <constraints>
-      <xy x="20" y="20" width="946" height="573"/>
+      <xy x="20" y="20" width="948" height="660"/>
     </constraints>
     <properties/>
     <border type="none"/>
@@ -151,7 +151,7 @@
           </grid>
           <grid id="a9d0e" binding="infoPanel" layout-manager="GridBagLayout">
             <constraints>
-              <grid row="1" column="0" row-span="3" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+              <grid row="1" column="0" row-span="3" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
               <gridbag weightx="0.0" weighty="1.0" ipadx="250" ipady="50"/>
             </constraints>
             <properties/>
@@ -173,7 +173,9 @@
                   </grid>
                   <gridbag top="10" left="0" bottom="0" right="10" weightx="0.5" weighty="1.0" ipadx="50"/>
                 </constraints>
-                <properties/>
+                <properties>
+                  <text value="2"/>
+                </properties>
               </component>
               <component id="29333" class="javax.swing.JLabel" binding="arn">
                 <constraints>
@@ -191,7 +193,9 @@
                   </grid>
                   <gridbag top="0" left="0" bottom="0" right="10" weightx="1.0" weighty="1.0" ipadx="50"/>
                 </constraints>
-                <properties/>
+                <properties>
+                  <text value="B-1234"/>
+                </properties>
               </component>
               <component id="84163" class="javax.swing.JLabel" binding="label">
                 <constraints>
@@ -209,7 +213,9 @@
                   </grid>
                   <gridbag top="0" left="0" bottom="0" right="10" weightx="1.0" weighty="1.0" ipadx="50"/>
                 </constraints>
-                <properties/>
+                <properties>
+                  <text value="QQ"/>
+                </properties>
               </component>
               <component id="83aae" class="javax.swing.JLabel" binding="id">
                 <constraints>
@@ -228,7 +234,7 @@
                   <gridbag top="0" left="0" bottom="0" right="10" weightx="1.0" weighty="1.0" ipadx="50"/>
                 </constraints>
                 <properties>
-                  <text value=""/>
+                  <text value="CA1234"/>
                 </properties>
               </component>
               <component id="76cb9" class="javax.swing.JLabel" binding="dubi">
@@ -247,7 +253,9 @@
                   </grid>
                   <gridbag top="0" left="0" bottom="0" right="10" weightx="1.0" weighty="1.0" ipadx="50"/>
                 </constraints>
-                <properties/>
+                <properties>
+                  <text value="A"/>
+                </properties>
               </component>
               <component id="8eee1" class="javax.swing.JLabel" binding="tak">
                 <constraints>
@@ -278,48 +286,22 @@
               </component>
               <component id="27db6" class="javax.swing.JLabel">
                 <constraints>
-                  <grid row="10" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                  <gridbag top="0" left="10" bottom="0" right="0" weightx="0.0" weighty="0.0"/>
+                  <grid row="8" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="10" fill="0" indent="0" use-parent-layout="false"/>
+                  <gridbag top="0" left="10" bottom="0" right="0" weightx="0.0" weighty="0.5"/>
                 </constraints>
                 <properties>
                   <text value="正文"/>
                 </properties>
               </component>
-              <vspacer id="6a93c">
-                <constraints>
-                  <grid row="9" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-                  <gridbag weightx="0.0" weighty="0.0"/>
-                </constraints>
-              </vspacer>
               <hspacer id="b6193">
                 <constraints>
                   <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                   <gridbag weightx="0.0" weighty="0.0"/>
                 </constraints>
               </hspacer>
-              <component id="fa9f5" class="javax.swing.JLabel">
-                <constraints>
-                  <grid row="8" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                  <gridbag top="0" left="10" bottom="0" right="0" weightx="1.0" weighty="1.0"/>
-                </constraints>
-                <properties>
-                  <text value="秘钥(Key)"/>
-                </properties>
-              </component>
-              <component id="80b2e" class="javax.swing.JTextField" binding="key">
-                <constraints>
-                  <grid row="8" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
-                    <preferred-size width="150" height="-1"/>
-                  </grid>
-                  <gridbag top="0" left="0" bottom="0" right="10" weightx="1.0" weighty="1.0"/>
-                </constraints>
-                <properties>
-                  <text value=""/>
-                </properties>
-              </component>
               <scrollpane id="c28a0">
                 <constraints>
-                  <grid row="11" column="0" row-span="1" col-span="3" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                  <grid row="9" column="0" row-span="1" col-span="3" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                   <gridbag top="10" left="10" bottom="10" right="10" weightx="0.0" weighty="0.0" ipady="50"/>
                 </constraints>
                 <properties/>
@@ -327,7 +309,9 @@
                 <children>
                   <component id="181c5" class="javax.swing.JTextArea" binding="text">
                     <constraints/>
-                    <properties/>
+                    <properties>
+                      <text value="FUCKYOU"/>
+                    </properties>
                   </component>
                 </children>
               </scrollpane>
@@ -395,6 +379,119 @@
                   <gridbag weightx="0.0" weighty="0.0"/>
                 </constraints>
               </hspacer>
+            </children>
+          </grid>
+        </children>
+      </grid>
+      <grid id="2de80" layout-manager="GridBagLayout">
+        <constraints>
+          <grid row="0" column="1" row-span="2" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+          <gridbag weightx="0.0" weighty="0.0"/>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="cdaf3" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+              <gridbag top="10" left="0" bottom="0" right="0" weightx="0.0" weighty="0.0"/>
+            </constraints>
+            <properties>
+              <text value="ACARS安全会话"/>
+            </properties>
+          </component>
+          <grid id="78867" binding="SignPanel" layout-manager="GridBagLayout">
+            <constraints>
+              <grid row="1" column="0" row-span="3" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+              <gridbag top="10" left="10" bottom="10" right="10" weightx="0.0" weighty="2.0"/>
+            </constraints>
+            <properties/>
+            <border type="none"/>
+            <children>
+              <component id="82b60" class="javax.swing.JLabel" binding="signState">
+                <constraints>
+                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                  <gridbag weightx="0.0" weighty="0.0"/>
+                </constraints>
+                <properties>
+                  <text value="状态：未完成签名"/>
+                </properties>
+              </component>
+              <component id="569ff" class="javax.swing.JButton" binding="DSPButton">
+                <constraints>
+                  <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <gridbag top="0" left="10" bottom="0" right="10" weightx="0.0" weighty="0.0"/>
+                </constraints>
+                <properties>
+                  <text value="生成DSP密钥对并签名"/>
+                </properties>
+              </component>
+              <component id="3381b" class="javax.swing.JButton" binding="CMUButton">
+                <constraints>
+                  <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <gridbag top="0" left="10" bottom="0" right="10" weightx="0.0" weighty="0.0"/>
+                </constraints>
+                <properties>
+                  <text value="生成CMU密钥对并签名"/>
+                </properties>
+              </component>
+              <vspacer id="b5d1a">
+                <constraints>
+                  <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                  <gridbag weightx="0.0" weighty="2.0"/>
+                </constraints>
+              </vspacer>
+              <vspacer id="f2035">
+                <constraints>
+                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                  <gridbag weightx="0.0" weighty="2.0"/>
+                </constraints>
+              </vspacer>
+              <vspacer id="c1720">
+                <constraints>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                  <gridbag weightx="0.0" weighty="0.0"/>
+                </constraints>
+              </vspacer>
+              <vspacer id="803ea">
+                <constraints>
+                  <grid row="10" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                  <gridbag weightx="0.0" weighty="5.0"/>
+                </constraints>
+              </vspacer>
+              <component id="e47b2" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                  <gridbag weightx="0.0" weighty="0.0"/>
+                </constraints>
+                <properties>
+                  <text value="空地加解密秘钥："/>
+                </properties>
+              </component>
+              <component id="68304" class="javax.swing.JTextField" binding="passwdField">
+                <constraints>
+                  <grid row="8" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                    <preferred-size width="150" height="-1"/>
+                  </grid>
+                  <gridbag weightx="0.0" weighty="0.0"/>
+                </constraints>
+                <properties/>
+              </component>
+              <vspacer id="5773f">
+                <constraints>
+                  <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                  <gridbag weightx="0.0" weighty="2.0"/>
+                </constraints>
+              </vspacer>
+              <component id="e16b1" class="javax.swing.JButton" binding="passwdbtn">
+                <constraints>
+                  <grid row="9" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <gridbag weightx="0.0" weighty="0.0"/>
+                </constraints>
+                <properties>
+                  <text value="确认"/>
+                </properties>
+              </component>
             </children>
           </grid>
         </children>
