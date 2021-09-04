@@ -29,13 +29,15 @@ public class DNDialog {
     private int mode;
     public KeyPair keyPair;
     public Certificate certificate;
+    public JButton fatherButton;
 
     /**
      * 构造方法
      * @param frame 子窗口（自身）
      */
-    public DNDialog(JFrame frame, int mode){
+    public DNDialog(JButton fatherButton, JFrame frame, int mode){
         this.mode = mode;
+        this.fatherButton = fatherButton;
 
         Title.setFont(new Font("Dialog" ,  1 , 20));
 
@@ -59,6 +61,7 @@ public class DNDialog {
                     final KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
                     keyPair = kpg.generateKeyPair();
                     DNDialog.this.certificate = SelfCertificate.genCertificate(keyPair, DN, mode);
+                    fatherButton.setEnabled(false);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }

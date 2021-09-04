@@ -45,8 +45,8 @@ public class MainForm {
     private JList messageList;
     private JButton noAckMessage;
     private JLabel utcLabel;
-    private JButton DSPButton;
-    private JButton CMUButton;
+    public JButton DSPButton;
+    public JButton CMUButton;
     private JPanel SignPanel;
     private JLabel signState;
     private JTextField passwdField;
@@ -73,38 +73,6 @@ public class MainForm {
         stateLabel.setForeground(Color.red);
         detail.setBorder(BorderFactory.createEtchedBorder(0));
         infoPanel.setBorder(BorderFactory.createEtchedBorder(0));
-
-        port.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                if(e.getDocument() == port.getDocument()){
-                    Document doc = e.getDocument();
-                    try {
-                        if(!"".equals(doc.getText(0, doc.getLength()))){
-                            startDSP.setEnabled(true);
-                        }
-                    } catch (BadLocationException badLocationException) {
-                        badLocationException.printStackTrace();
-                    }
-                }
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                if(e.getDocument() == port.getDocument()){
-                    Document doc = e.getDocument();
-                    try {
-                        if("".equals(doc.getText(0, doc.getLength()))){
-                            startDSP.setEnabled(false);
-                        }
-                    } catch (BadLocationException badLocationException) {
-                        badLocationException.printStackTrace();
-                    }
-                }
-            }
-            @Override
-            public void changedUpdate(DocumentEvent e) {}
-        });
 
         //发送按钮监听器
         sendMessage.addActionListener(new ActionListener() {
@@ -222,17 +190,21 @@ public class MainForm {
         startDSP.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                int port2int = Integer.parseInt(port.getText());
+                try {
+                    int port2int = Integer.parseInt(port.getText());
 
-                if(port2int > 65536 || port2int < 0){
+                    if(port2int > 65536 || port2int < 0){
+                        JOptionPane.showMessageDialog(null, "端口范围为1-65535");
+                    }else{
+                        new Thread(){
+                            @Override
+                            public void run() {
+                                serverListener.start(Integer.parseInt(port.getText()));
+                            }
+                        }.start();
+                    }
+                }catch (Exception xe){
                     JOptionPane.showMessageDialog(null, "端口输入错误");
-                }else{
-                    new Thread(){
-                        @Override
-                        public void run() {
-                            serverListener.start(Integer.parseInt(port.getText()));
-                        }
-                    }.start();
                 }
             }
         });
@@ -245,7 +217,7 @@ public class MainForm {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JFrame frame = new JFrame("地面站信息");
-                DSPDialog = new DNDialog(frame, SelfCertificate.DSP);
+                DSPDialog = new DNDialog(DSPButton, frame, SelfCertificate.DSP);
                 DSPDialog.Title.setText("地面站信息");
                 //构建窗口, this是父窗口，传入子窗口以便传值 , 同时要传入子窗口自身,以保证实现窗口关闭功能
                 frame.setContentPane(DSPDialog.SignInfoPanel);
@@ -257,13 +229,14 @@ public class MainForm {
 
                 //禁止调整大小
                 frame.setResizable(false);
+
             }
         });
         CMUButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JFrame frame = new JFrame("航空器信息");
-                CMUDialog = new DNDialog(frame, SelfCertificate.CMU);
+                CMUDialog = new DNDialog(CMUButton, frame, SelfCertificate.CMU);
                 CMUDialog.Title.setText("航空器信息");
                 //构建窗口, this是父窗口，传入子窗口以便传值 , 同时要传入子窗口自身,以保证实现窗口关闭功能
                 frame.setContentPane(CMUDialog.SignInfoPanel);
@@ -275,6 +248,7 @@ public class MainForm {
 
                 //禁止调整大小
                 frame.setResizable(false);
+
             }
         });
 
@@ -282,8 +256,27 @@ public class MainForm {
             @Override
             public void actionPerformed(ActionEvent e) {
                 passwd = passwdField.getText();
-                System.out.println(passwd);
+                passwdField.setEditable(false);
+                passwdbtn.setEnabled(false);
             }
         });
+
+        //当证书以及空地协定秘钥均生成后，开放连接选项
+        new Thread(){
+            @Override
+            public void run() {
+                while(true){
+                    if(!passwdbtn.isEnabled() && !CMUButton.isEnabled() && !DSPButton.isEnabled()){
+                        startDSP.setEnabled(true);
+                        break;
+                    }
+                    try {
+                        sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }.start();
     }
 }

@@ -310,7 +310,7 @@
                   <component id="181c5" class="javax.swing.JTextArea" binding="text">
                     <constraints/>
                     <properties>
-                      <text value="FUCKYOU"/>
+                      <text value="ABCDEFG"/>
                     </properties>
                   </component>
                 </children>
