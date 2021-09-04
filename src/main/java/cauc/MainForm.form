@@ -414,7 +414,7 @@
                   <gridbag weightx="0.0" weighty="0.0"/>
                 </constraints>
                 <properties>
-                  <text value="状态：未完成签名"/>
+                  <text value="状态：未完成"/>
                 </properties>
               </component>
               <component id="569ff" class="javax.swing.JButton" binding="DSPButton">

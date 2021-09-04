@@ -268,6 +268,8 @@ public class MainForm {
                 while(true){
                     if(!passwdbtn.isEnabled() && !CMUButton.isEnabled() && !DSPButton.isEnabled()){
                         startDSP.setEnabled(true);
+                        signState.setForeground(Color.decode("#008000"));
+                        signState.setText("状态：已完成");
                         break;
                     }
                     try {
