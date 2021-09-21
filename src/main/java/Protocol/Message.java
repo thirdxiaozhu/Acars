@@ -33,10 +33,10 @@ public class Message {
             }else{
                 String text = mainForm.text.getText();
                 StringBuilder sb = new StringBuilder(text);
-                if(text.length() > 220){
-                    JOptionPane.showMessageDialog(mainForm.mainPanel, "正文长度超过220个字符！");
-                    return null;
-                }
+                //if(text.length() > 220){
+                //    JOptionPane.showMessageDialog(mainForm.mainPanel, "正文长度超过220个字符！");
+                //    return null;
+                //}
 
                 //逐个位置替换成6bit
                 int tag = 0;
@@ -56,15 +56,31 @@ public class Message {
 
                 //明文
                 byte[] plainText = sb.toString().getBytes();
-                //密文
+                long starttime = System.nanoTime();
                 byte[] cryptedText = CryptoUtil.enCrypt(mainForm.passwd, Util.loadCode(plainText));
+                long endtime = System.nanoTime();
+                System.out.println("编码 + 加密时间：" + String.valueOf(endtime-starttime));
+
+
                 //对密文的签名
+                starttime = System.nanoTime();
                 byte[] signValue = CryptoUtil.signMessage(mainForm.DSPDialog.keyPair.getPrivate(), cryptedText, cryptedText.length);
+                endtime = System.nanoTime();
+                System.out.println("签名时间：" + String.valueOf(endtime-starttime));
+
+
                 //密文长度（1byte）+ 签名值长度（1byte）+ 密文 + 明文 组成正文
                 byte[] result = new byte[cryptedText.length + signValue.length + CIPHER_LENGTH + SIGN_LENGTH];
+                System.out.println(cryptedText.length);
                 System.arraycopy(new byte[]{(byte) cryptedText.length, (byte) signValue.length}, 0, result, 0, CIPHER_LENGTH + SIGN_LENGTH);
                 System.arraycopy(cryptedText, 0, result, CIPHER_LENGTH + SIGN_LENGTH, cryptedText.length);
                 System.arraycopy(signValue, 0, result, CIPHER_LENGTH + SIGN_LENGTH + cryptedText.length, signValue.length);
+                System.out.println((int)result[0] + " " + (int)result[1]);
+
+                if(result.length > 220){
+                    JOptionPane.showMessageDialog(mainForm.mainPanel, "正文长度超过220个字符！");
+                    return null;
+                }
 
                 protocol.setText(result);
             }

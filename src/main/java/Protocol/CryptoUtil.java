@@ -19,10 +19,17 @@ public class CryptoUtil {
      */
     private static Key operateKey(String password) throws Exception{
         byte[] passwd = password.getBytes();
-        //MD5可生成128位密钥(必须为128位)
-        MessageDigest md = MessageDigest.getInstance("MD5");
+
+        //MD5可生成128位散列值(必须为128位)
+        //SM3可生成256位散列值，需要截取
+        //MessageDigest md = MessageDigest.getInstance("MD5");
+        MessageDigest md = MessageDigest.getInstance("SM3");
         byte[] keyData = md.digest(passwd);
-        SecretKeySpec key = new SecretKeySpec(keyData, "SM4");
+        System.out.println("keyData: " + keyData.length);
+        byte[] temp = new byte[16];
+        System.arraycopy(keyData, 0, temp, 0, 16);
+
+        SecretKeySpec key = new SecretKeySpec(temp, "SM4");
         return key;
     }
 
