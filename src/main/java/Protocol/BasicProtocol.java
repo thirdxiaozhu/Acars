@@ -1,8 +1,10 @@
 package Protocol;
 
+import javax.crypto.SecretKey;
 import javax.swing.*;
 import java.io.ByteArrayOutputStream;
 import java.security.cert.Certificate;
+import java.util.List;
 
 /**
  * @author jiaxv
@@ -29,6 +31,8 @@ public class BasicProtocol {
 
     private String time;
     private String date_time;
+
+    private int stateMod;
 
     public int getLength(){
         return SOH_LEN + MODE_LEN + ARN_LEN + TAK_LEN + LABEL_LEN + DUBI_LEN +
@@ -104,7 +108,7 @@ public class BasicProtocol {
 
         byte[] suffix = {Util.indexto8bit(7,1)};
 
-        byte[] bcs = Util.getCRC16(front.toByteArray());
+        byte[] bcs = Util.getCRC16_ccitt(front.toByteArray());
         byte[] bcssuf = {Util.indexto8bit(15,7)};
         byte[] tail = {Util.indexto8bit(0,1)};
 
@@ -178,7 +182,9 @@ public class BasicProtocol {
      * @return
      * @throws Exception
      */
-    public int parseContentData(Certificate certificate, String passwd, byte[] data) throws Exception {
+    public int parseContentData(byte[] data) throws Exception {
+        stateMod = 0;
+
         mode = parseMode(data);
         arn = parseArn(data);
         tak = parseTak(data);
@@ -189,5 +195,63 @@ public class BasicProtocol {
 
         return HEAD_LEN + SOH_LEN + MODE_LEN +
                 ARN_LEN + TAK_LEN + LABEL_LEN + DUBI_LEN + STX_LEN;
+    }
+    /**
+     * 解析报文内容
+     * @param data
+     * @return
+     * @throws Exception
+     */
+    public int parseContentData(Certificate certificate, String passwd, byte[] data) throws Exception {
+        stateMod = 1;
+
+        mode = parseMode(data);
+        arn = parseArn(data);
+        tak = parseTak(data);
+        label = parseLabel(data);
+        dubi = parseDubi(data);
+        time = Util.getTime(0);
+        date_time = Util.getTime(1);
+
+        return HEAD_LEN + SOH_LEN + MODE_LEN +
+                ARN_LEN + TAK_LEN + LABEL_LEN + DUBI_LEN + STX_LEN;
+    }
+
+    /**
+     * 解析报文内容
+     * @param data
+     * @return
+     * @throws Exception
+     */
+    public int parseContentData(byte[] data, boolean isCertificated, SecretKey secretKey) throws Exception {
+        mode = parseMode(data);
+        arn = parseArn(data);
+        tak = parseTak(data);
+        label = parseLabel(data);
+        dubi = parseDubi(data);
+        time = Util.getTime(0);
+        date_time = Util.getTime(1);
+
+        return HEAD_LEN + SOH_LEN + MODE_LEN +
+                ARN_LEN + TAK_LEN + LABEL_LEN + DUBI_LEN + STX_LEN;
+    }
+
+    public int parseContentData(Certificate certificate, List<String> signValueList, String passwd, byte[] data) throws Exception {
+        stateMod = 1;
+
+        mode = parseMode(data);
+        arn = parseArn(data);
+        tak = parseTak(data);
+        label = parseLabel(data);
+        dubi = parseDubi(data);
+        time = Util.getTime(0);
+        date_time = Util.getTime(1);
+
+        return HEAD_LEN + SOH_LEN + MODE_LEN +
+                ARN_LEN + TAK_LEN + LABEL_LEN + DUBI_LEN + STX_LEN;
+    }
+
+    public int getStateMod() {
+        return stateMod;
     }
 }

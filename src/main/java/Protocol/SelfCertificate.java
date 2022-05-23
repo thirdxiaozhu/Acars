@@ -5,6 +5,8 @@ import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
+import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPrivateKey;
+import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
@@ -16,6 +18,8 @@ import java.io.FileOutputStream;
 import java.math.BigInteger;
 import java.security.*;
 import java.security.cert.Certificate;
+import java.security.spec.ECGenParameterSpec;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -25,6 +29,61 @@ import java.util.Date;
 public class SelfCertificate {
     public static final int DSP = 0;
     public static final int CMU = 1;
+    private byte[] ID;
+    public KeyPairDto keyPairDto;
+    private byte[] time;
+    private byte[] certificate;
+    private byte[] pubKey;
+
+    public SelfCertificate(String ID) {
+        this.ID = String.format("%10s",ID).replace(" ",".").getBytes();
+        this.keyPairDto = generateKeyPair();
+        this.time = getTime();
+        this.pubKey = keyPairDto.getPublicKey();
+        this.certificate = new byte[this.ID.length+pubKey.length+time.length];
+        generateCertificate();
+    }
+
+    private byte[] getTime(){
+        SimpleDateFormat mFormat = new SimpleDateFormat("yyyy-MM-dd:HH-mm-ss");
+        //自动获取当前时间
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_MONTH,1);
+
+        return mFormat.format(calendar.getTime()).getBytes();
+    }
+
+    private KeyPairDto generateKeyPair(){
+        try {
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("EC", new BouncyCastleProvider());
+            keyPairGenerator.initialize(new ECGenParameterSpec("sm2p256v1"));
+            KeyPair ecKeyPair = keyPairGenerator.generateKeyPair();
+            BCECPublicKey ecPublicKey = (BCECPublicKey) ecKeyPair.getPublic();
+            BCECPrivateKey ecPrivateKey = (BCECPrivateKey) ecKeyPair.getPrivate();
+
+            return new KeyPairDto(ecPublicKey, ecPrivateKey);
+        } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private void generateCertificate() {
+        System.arraycopy(ID, 0, certificate, 0, ID.length);
+        System.arraycopy(pubKey, 0, certificate, ID.length, pubKey.length);
+        System.arraycopy(time, 0, certificate, ID.length+pubKey.length, time.length);
+    }
+
+
+    public byte[] getCertificate() {
+        return certificate;
+    }
+
+    public KeyPairDto getKeyPairDto(){
+        return keyPairDto;
+    }
+
+
 
     /**
      * 保存成秘钥库文件
@@ -77,6 +136,9 @@ public class SelfCertificate {
     private static Certificate selfSign(KeyPair keyPair, String signaturealg, String DN) throws Exception{
         BouncyCastleProvider bouncyCastleProvider = new BouncyCastleProvider();
         Security.addProvider(bouncyCastleProvider);
+
+        System.out.println(keyPair.getPublic());
+        System.out.println(keyPair.getPrivate());
 
         long now = System.currentTimeMillis();
         Date startDate = new Date(now);

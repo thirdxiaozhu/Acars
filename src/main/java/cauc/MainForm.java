@@ -1,284 +1,86 @@
 package cauc;
 
-import Protocol.*;
-
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 
-/**
- * @author jiaxv
- */
 public class MainForm {
     public JPanel mainPanel;
-    public JTextField modeInput;
-    public JTextField arnInput;
-    public JTextField labelInput;
-    public JTextField idInput;
-    public JTextField dubiInput;
-    public JTextField takInput;
-    public JTextField key;
-    public JTextArea detail;
-    public JTextArea text;
-    private JLabel mode;
-    private JLabel arn;
-    private JLabel label;
-    private JLabel id;
-    private JLabel dubi;
-    private JLabel tak;
-    private JLabel utc;
-    private JPanel infoPanel;
-    public JTextField port;
-    public JButton startDSP;
-    public JButton sendMessage;
-    public JButton closeDSP;
-    public JButton preview;
-    public JLabel stateLabel;
-    private JList messageList;
-    private JButton noAckMessage;
-    private JLabel utcLabel;
-    public JButton DSPButton;
-    public JButton CMUButton;
-    private JPanel SignPanel;
-    private JLabel signState;
-    private JTextField passwdField;
-    private JButton passwdbtn;
-    private ServerListener serverListener;
-    public DefaultListModel<BasicProtocol> messageListModel;
-    public DNDialog DSPDialog;
-    public DNDialog CMUDialog;
-    public String passwd;
+    private JButton DSPButton;
+    private JButton CMUButton;
+    private JButton MethodButton;
+    private JButton AboutButton;
+    private JLabel icon;
 
-    public MainForm(){
+    public MainForm() {
         initPanel();
-        initSignPanel();
-        initList();
     }
 
-    private void initPanel(){
-        startDSP.setEnabled(false);
-        closeDSP.setEnabled(false);
-        sendMessage.setEnabled(false);
-        preview.setEnabled(false);
-        detail.setLineWrap(true);
+    private void initPanel() {
+        icon.setIcon(new ImageIcon("src/main/resources/图片1.png"));
 
-        stateLabel.setForeground(Color.red);
-        detail.setBorder(BorderFactory.createEtchedBorder(0));
-        infoPanel.setBorder(BorderFactory.createEtchedBorder(0));
-
-        //发送按钮监听器
-        sendMessage.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if(serverListener == null){
-                    JOptionPane.showMessageDialog(null, "尚未连接");
-                }else {
-                    serverListener.addNewRequest(Message.uplinkMessage(MainForm.this, Message.ENCRYPT));
-                }
-            }
-        });
-
-        startServer();
-
-        //关闭按钮监听器
-        closeDSP.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    serverListener.closeConnection();
-                    port.setEnabled(true);
-                    closeDSP.setEnabled(false);
-                    startDSP.setEnabled(true);
-                    sendMessage.setEnabled(false);
-                    preview.setEnabled(false);
-                    stateLabel.setForeground(Color.red);
-                    stateLabel.setText("当前连接状态：未启动");
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
-                }
-            }
-        });
-
-        preview.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                callPreviewLayout();
-            }
-        });
-
-        /**
-         * 非应答报文监听器
-         */
-        noAckMessage.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                modeInput.setText("");
-                arnInput.setText("");
-                labelInput.setText("");
-                idInput.setText("");
-                dubiInput.setText("");
-                takInput.setText("");
-                key.setText("");
-                text.setText("");
-                detail.setText("");
-                utcLabel.setText("");
-            }
-        });
-    }
-
-    private void callPreviewLayout() {
-        JFrame frame = new JFrame("预览");
-        //构建窗口, this是父窗口，传入子窗口以便传值 , 同时要传入子窗口自身,以保证实现窗口关闭功能
-        frame.setContentPane(new Preview(frame , this).previewPanel);
-        frame.pack();
-        frame.setVisible(true);
-        frame.setLayout(null);
-        //在屏幕中间显示
-        frame.setLocation(550 , 350);
-
-        //禁止调整大小
-        frame.setResizable(false);
-    }
-
-    /**
-     * 设置报文列表基本内容及触发器
-     */
-    private void initList(){
-        detail.setPreferredSize(new Dimension(200,100));
-        messageListModel = new DefaultListModel<>();
-        messageList.setModel(messageListModel);
-        messageList.setCellRenderer(new MyListCellRenderer());
-        messageList.addListSelectionListener(new ListSelectionListener() {
-            @Override
-            public void valueChanged(ListSelectionEvent e) {
-                DownlinkProtocol protocol = (DownlinkProtocol) messageList.getSelectedValue();
-                modeInput.setEditable(false);
-                arnInput.setEditable(false);
-                idInput.setEditable(false);
-
-                modeInput.setText(Util.getAttributes(new byte[]{protocol.getMode()}, 0));
-                arnInput.setText(Util.getAttributes(protocol.getArn(), 0));
-                idInput.setText(Util.getAttributes(protocol.getFlightId(), 1));
-                takInput.setText(Util.getAttributes(new byte[]{protocol.getTak()}, 0));
-                utcLabel.setText(protocol.getTime());
-
-                detail.setText(
-                        "QU" + " xxxxxxx\n" +
-                        ".BSJXXXX " + protocol.getDateTime() + "\n" +
-                        SmiLabelMap.getInstance().LABEL_SMI_DOWN.get(Util.getAttributes(protocol.getLabel(), 0)) + "\n" +
-                        "FI " + Util.getAttributes(protocol.getFlightId(), 1) + "/AN " + Util.getAttributes(protocol.getArn(), 0) + "\n" +
-                        "DT BJS LOCAL " + protocol.getDateTime() + " M01A\n" +
-                        " - " + Util.getAttributes(protocol.getFreeText(), 1)
-                );
-            }
-        });
-    }
-
-    /**
-     * 检查端口是否合法并启动服务
-     */
-    private void startServer(){
-        serverListener = new ServerListener(this);
-        startDSP.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    int port2int = Integer.parseInt(port.getText());
-
-                    if(port2int > 65536 || port2int < 0){
-                        JOptionPane.showMessageDialog(null, "端口范围为1-65535");
-                    }else{
-                        new Thread(){
-                            @Override
-                            public void run() {
-                                serverListener.start(Integer.parseInt(port.getText()));
-                            }
-                        }.start();
-                    }
-                }catch (Exception xe){
-                    JOptionPane.showMessageDialog(null, "端口输入错误");
-                }
-            }
-        });
-    }
-
-    public void initSignPanel(){
-        SignPanel.setBorder(BorderFactory.createEtchedBorder(0));
-        signState.setForeground(Color.red);
         DSPButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JFrame frame = new JFrame("地面站信息");
-                DSPDialog = new DNDialog(DSPButton, frame, SelfCertificate.DSP);
-                DSPDialog.Title.setText("地面站信息");
-                //构建窗口, this是父窗口，传入子窗口以便传值 , 同时要传入子窗口自身,以保证实现窗口关闭功能
-                frame.setContentPane(DSPDialog.SignInfoPanel);
+                JFrame frame = new JFrame("地面站DSP");
+                DSP_MainForm dspMainForm = new DSP_MainForm();
+                //构建窗口
+                frame.setContentPane(dspMainForm.mainPanel);
+                //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                frame.addWindowListener(new WindowAdapter() {
+                    @Override
+                    public void windowClosing(WindowEvent e) {
+                        //super.windowClosing(e);
+                        DSPButton.setEnabled(true);
+                        try {
+                            dspMainForm.serverListener.closeConnection();
+                        } catch (IOException ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+                });
                 frame.pack();
                 frame.setVisible(true);
                 frame.setLayout(null);
                 //在屏幕中间显示
-                frame.setLocation(550 , 350);
-
+                frame.setLocationRelativeTo(null);
                 //禁止调整大小
                 frame.setResizable(false);
-
+                DSPButton.setEnabled(false);
             }
         });
+
         CMUButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JFrame frame = new JFrame("航空器信息");
-                CMUDialog = new DNDialog(CMUButton, frame, SelfCertificate.CMU);
-                CMUDialog.Title.setText("航空器信息");
-                //构建窗口, this是父窗口，传入子窗口以便传值 , 同时要传入子窗口自身,以保证实现窗口关闭功能
-                frame.setContentPane(CMUDialog.SignInfoPanel);
+                JFrame frame = new JFrame("机载CMU");
+                CMU_MainForm cmuMainForm = new CMU_MainForm();
+                //构建窗口
+                frame.setContentPane(cmuMainForm.mainPanel);
+                //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                frame.addWindowListener(new WindowAdapter() {
+                    @Override
+                    public void windowClosing(WindowEvent e) {
+                        CMUButton.setEnabled(true);
+                        if(cmuMainForm.client != null) {
+                            cmuMainForm.client.closeConnection();
+                        }
+                    }
+                });
                 frame.pack();
                 frame.setVisible(true);
                 frame.setLayout(null);
                 //在屏幕中间显示
-                frame.setLocation(550 , 350);
-
+                frame.setLocationRelativeTo(null);
                 //禁止调整大小
                 frame.setResizable(false);
-
+                CMUButton.setEnabled(false);
             }
         });
 
-        passwdbtn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                passwd = passwdField.getText();
-                passwdField.setEditable(false);
-                passwdbtn.setEnabled(false);
-            }
-        });
 
-        //当证书以及空地协定秘钥均生成后，开放连接选项
-        new Thread(){
-            @Override
-            public void run() {
-                while(true){
-                    if(!passwdbtn.isEnabled() && !CMUButton.isEnabled() && !DSPButton.isEnabled()){
-                        startDSP.setEnabled(true);
-                        signState.setForeground(Color.decode("#008000"));
-                        signState.setText("状态：已完成");
-                        break;
-                    }
-                    try {
-                        sleep(100);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }.start();
     }
 }

@@ -1,8 +1,6 @@
 package cauc;
 
-import Protocol.Message;
-import Protocol.UplinkProtocol;
-import Protocol.Util;
+import Protocol.*;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -16,13 +14,22 @@ public class Preview {
     private JTextArea PlainText;
     private JTextArea CipherText;
     private JButton AcceptBtn;
-    private final MainForm mainForm;
+    private DSP_MainForm DSPMainForm = null;
+    private CMU_MainForm CMUMainForm = null;
 
 
-    public Preview(JFrame frame, MainForm mainForm) {
-        this.mainForm = mainForm;
-        UplinkProtocol plain = Message.uplinkMessage(mainForm, Message.PREVIEW);
-        UplinkProtocol cipher = Message.uplinkMessage(mainForm, Message.ENCRYPT);
+    public Preview(JFrame frame, DSP_MainForm DSPMainForm, CMU_MainForm CMUMainForm) {
+        this.DSPMainForm = DSPMainForm;
+        this.CMUMainForm = CMUMainForm;
+        Protocol plain = null;
+        Protocol cipher = null;
+        if (DSPMainForm != null) {
+            plain = (DownlinkProtocol) Message.downlinkMessage(CMUMainForm, Message.PREVIEW);
+            cipher = (DownlinkProtocol) Message.downlinkMessage(CMUMainForm, Message.ENCRYPT);
+        } else {
+            plain = (UplinkProtocol) Message.uplinkMessage(DSPMainForm, Message.PREVIEW);
+            cipher = (UplinkProtocol) Message.uplinkMessage(DSPMainForm, Message.ENCRYPT);
+        }
         CipherText.setText(Util.getCypherText(cipher));
         PlainText.setText(Util.getUntreatedPlainText(plain));
 

@@ -1,9 +1,11 @@
 package Protocol;
 
+import javax.crypto.SecretKey;
 import javax.swing.*;
 import java.io.ByteArrayOutputStream;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -60,10 +62,20 @@ public class UplinkProtocol extends BasicProtocol implements Protocol{
         return baos.toByteArray();
     }
 
-    public byte[] parseText(byte[] data, int pos){
+    public byte[] parseText(byte[] data, int pos, int mod){
         List<Byte> resultList = new ArrayList<>();
-        for(int i = 0; i < data.length - pos - 4; i++){
-            resultList.add(data[pos+i]);
+        if(mod == 0){
+            for(int i = pos; data[i] != 3 && data[i] != 23; i++){
+                resultList.add(data[i]);
+            }
+        }else if(mod == 1){
+            for(int i = 0; i < data.length - pos - 4; i++){
+                resultList.add(data[pos+i]);
+            }
+        }else{
+            for(int i = 0; i < data.length - pos - 4; i++){
+                resultList.add(data[pos+i]);
+            }
         }
 
         Object[] resultObj = resultList.toArray();
@@ -75,9 +87,30 @@ public class UplinkProtocol extends BasicProtocol implements Protocol{
     }
 
     @Override
+    public int parseContentData(byte[] data) throws Exception {
+        int pos = super.parseContentData(data);
+        text = parseText(data, pos, 0);
+
+        return pos + text.length;
+    }
+
+    public byte[] parseFreeText(byte[] text) {
+        int temp = 0;
+        for (byte b : text) {
+            if ((int) b != 0) {
+                temp++;
+            }
+        }
+
+        byte[] result = new byte[temp-4];
+        System.arraycopy(text, 0, result, 0, result.length);
+        return LoadCode.getDecoder().decode(result);
+    }
+
+    @Override
     public int parseContentData(Certificate certificate, String passwd, byte[] data) throws Exception {
         int pos = super.parseContentData(certificate, passwd, data);
-        byte[] message = parseText(data, pos);
+        byte[] message = parseText(data, pos, 1);
         byte[] cypherText = new byte[(int)message[0]];
         byte[] signValue = new byte[(int)message[1]];
         System.arraycopy(message, 2, cypherText, 0, cypherText.length);
@@ -85,9 +118,52 @@ public class UplinkProtocol extends BasicProtocol implements Protocol{
         if(CryptoUtil.verifyMessage(certificate, cypherText, signValue)){
             text = Util.deLoadCode(CryptoUtil.deCrypt(passwd, cypherText));
         }else {
-            JOptionPane.showMessageDialog(null, "该消息已被篡改！");
+            JOptionPane.showMessageDialog(null, "该消息已被攻击！");
             text = new byte[]{};
         }
         return pos + text.length;
     }
+
+    @Override
+    public int parseContentData(Certificate certificate, List<String> signValueList, String passwd, byte[] data) throws Exception {
+        int pos = super.parseContentData(certificate, signValueList, passwd, data);
+        byte[] message = parseText(data, pos, 1);
+        byte[] cypherText = new byte[(int) message[0] & 0xFF];
+        byte[] signValue = new byte[(int)message[1] & 0xFF];
+        System.arraycopy(message, 2, cypherText, 0, cypherText.length);
+        System.arraycopy(message, 2+cypherText.length, signValue, 0, signValue.length);
+
+        for(String s: signValueList){
+            if(s.equals(Arrays.toString(signValue))){
+                JOptionPane.showMessageDialog(null, "该消息被重放！");
+                return pos + (new byte[]{}.length);
+            }else {
+                signValueList.add(Arrays.toString(signValue));
+            }
+        }
+
+        if(CryptoUtil.verifyMessage(certificate, cypherText, signValue)){
+            long starttime = System.nanoTime();
+            text = Util.deLoadCode(CryptoUtil.deCrypt(passwd, cypherText));
+            long endtime = System.nanoTime();
+            System.out.println("解密时间：" + String.valueOf(endtime-starttime));
+        }else {
+            JOptionPane.showMessageDialog(null, "该消息已被攻击！");
+            text = new byte[]{};
+        }
+        return pos + text.length;
+    }
+
+    @Override
+    public int parseContentData(byte[] data, boolean isCertificated, SecretKey secretKey) throws Exception {
+        int pos = super.parseContentData(data, isCertificated, secretKey);
+        if(isCertificated){
+            text = CryptoUtil.deCrypt(secretKey, parseFreeText(parseText(data, pos, 2)));
+        }else{
+            text = parseFreeText(parseText(data, pos,2));
+        }
+
+        return pos + text.length;
+    }
+
 }

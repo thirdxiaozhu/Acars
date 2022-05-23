@@ -50,20 +50,15 @@ public class Util {
      * @param data_arr 需要进行BSC校验的字符数组
      * @return 两个字符的字符数组
      */
-    public static byte[] getCRC16(byte[] data_arr){
-        int crc16 = 0x0;
-        //从第二位开始，因为需要避开<SOH>
-        for(int i = 1; i < data_arr.length; i++)
-        {
-            crc16 = (char)(( crc16 >> 8) | (crc16 << 8));
-            crc16 ^= data_arr[i] & 0xFF;
-            crc16 ^= (char)(( crc16 & 0xFF) >> 4);
-            crc16 ^= (char)(( crc16 << 8) << 4);
-            crc16 ^= (char)((( crc16 & 0xFF) << 4) << 1);
+    static byte[] getCRC16_ccitt(byte [] data_arr) {
+        int crcReg = 0x0000;
+        for(int i = 1; i < data_arr.length; i++){
+            crcReg = Config.CRC16_ccitt_table[(crcReg ^ data_arr[i]) & 0xFF] ^ (crcReg >> 8);
         }
-        byte[] res = int2ByteArrays(crc16);
-        return res;
+        String hexstring = String.format("%4s",Integer.toHexString(crcReg).toUpperCase()).replace(" ","0");
+        return hexStringToByteArray(hexstring);
     }
+
 
     /**
      * 专门用来解析BSC
@@ -204,15 +199,21 @@ public class Util {
     public static String getPlainText(BasicProtocol protocol){
         byte[] text = protocol.getContentData();
         StringBuffer sb = new StringBuffer(text.length);
+        int stateMod = protocol.getStateMod();
 
-        for(int i = 4; i < text.length; i++){
-            if(i < 18 || i > text.length-5) {
+        if(stateMod == 0){
+            for(int i = 4; i < text.length; i++){
                 sb.append(Config.TABLE_FOR_8BIT[text[i] & 0x0f][(text[i] >> 4) & 0x07]);
-            }else {
-                sb.append(Config.TABLE_FOR_6BIT[text[i] & 0x0f][(text[i] >> 4) & 0x07]);
+            }
+        }else if(stateMod == 1){
+            for(int i = 4; i < text.length; i++){
+                if(i < 18 || i > text.length-5) {
+                    sb.append(Config.TABLE_FOR_8BIT[text[i] & 0x0f][(text[i] >> 4) & 0x07]);
+                }else {
+                    sb.append(Config.TABLE_FOR_6BIT[text[i] & 0x0f][(text[i] >> 4) & 0x07]);
+                }
             }
         }
-
         return sb.toString();
     }
 
@@ -223,9 +224,9 @@ public class Util {
      */
     public static String getAttributes(byte[] bytes, int mode){
         StringBuffer sb = new StringBuffer();
-
+        System.out.println(new String(bytes));
         for(int i = 0; i < bytes.length; i++){
-            if(mode == 0) {
+            if(mode == 0 || mode == 2) {
                 //<NAK> 00010101 (21)
                 if(bytes[i] == 21){
                     continue;
@@ -254,5 +255,22 @@ public class Util {
         }
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
         return sdf.format(date);
+    }
+
+    /**
+     * 16进制表示的字符串转换为字节数组
+     *
+     * @param s 16进制表示的字符串
+     * @return byte[] 字节数组
+     */
+    public static byte[] hexStringToByteArray(String s) {
+        int len = s.length();
+        byte[] b = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            // 两位一组，表示一个字节,把这样表示的16进制字符串，还原成一个字节
+            b[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4) + Character
+                    .digit(s.charAt(i + 1), 16));
+        }
+        return b;
     }
 }

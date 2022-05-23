@@ -33,13 +33,14 @@ public class DNDialog {
 
     /**
      * 构造方法
+     *
      * @param frame 子窗口（自身）
      */
-    public DNDialog(JButton fatherButton, JFrame frame, int mode){
+    public DNDialog(JButton fatherButton, JFrame frame, int mode) {
         this.mode = mode;
         this.fatherButton = fatherButton;
 
-        Title.setFont(new Font("Dialog" ,  1 , 20));
+        Title.setFont(new Font("Dialog", 1, 20));
 
         /* 关闭窗口按钮 */
         CloseBtn.addActionListener(new ActionListener() {
@@ -54,7 +55,7 @@ public class DNDialog {
             @Override
             public void actionPerformed(ActionEvent e) {
                 //拼接字符串以便传给X500Name
-                String DN = "CN=" + CN.getText() +",OU=" + OU.getText() + ",O=" + O.getText() +
+                String DN = "CN=" + CN.getText() + ",OU=" + OU.getText() + ",O=" + O.getText() +
                         ",L=" + L.getText() + ",ST=" + ST.getText() + ",C=" + C.getText();
                 try {
                     //生成密钥对并生成证书
@@ -82,7 +83,7 @@ public class DNDialog {
     /**
      * 清空按钮事件
      */
-    private void clearText(){
+    private void clearText() {
         CN.setText("");
         OU.setText("");
         O.setText("");

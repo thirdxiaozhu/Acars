@@ -1,5 +1,6 @@
 package Protocol;
 
+import javax.crypto.SecretKey;
 import javax.swing.*;
 import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
@@ -87,10 +88,20 @@ public class DownlinkProtocol extends BasicProtocol implements Protocol , Serial
         return baos.toByteArray();
     }
 
-    public byte[] parseText(byte[] data, int pos){
+    public byte[] parseText(byte[] data, int pos, int mod){
         List<Byte> resultList = new ArrayList<>();
-        for(int i = 0; i < data.length - pos - 4; i++){
-            resultList.add(data[pos+i]);
+        if(mod == 0){
+            for(int i = pos; data[i] != 3 && data[i] != 23; i++){
+                resultList.add(data[i]);
+            }
+        }else if(mod == 1){
+            for(int i = 0; i < data.length - pos - 4; i++){
+                resultList.add(data[pos+i]);
+            }
+        }else if(mod == 2){
+            for(int i = 0; i < data.length - pos - 4; i++){
+                resultList.add(data[pos+i]);
+            }
         }
 
         Object[] resultObj = resultList.toArray();
@@ -119,24 +130,64 @@ public class DownlinkProtocol extends BasicProtocol implements Protocol , Serial
         return result;
     }
 
+    public byte[] parseMainBody(byte[] src){
+        int temp = 0;
+        for(byte b: src){
+            if((int) b != 0){
+                temp++;
+            }
+        }
+
+        byte[] result = new byte[temp-4];
+        System.arraycopy(src, 0, result, 0, result.length);
+        return LoadCode.getDecoder().decode(result);
+    }
+
+    @Override
+    public int parseContentData(byte[] data) throws Exception {
+        int pos = super.parseContentData(data);
+
+        text = parseText(data, pos, 0);
+        msn = parseMsn(text);
+        flightId = parseFlightID(text);
+        freetext = parseFreeText(text);
+        return pos + text.length;
+    }
+
     @Override
     public int parseContentData(Certificate certificate, String passwd, byte[] data) throws Exception {
         int pos = super.parseContentData(certificate, passwd, data);
 
-        byte[] message = parseText(data, pos);
+        byte[] message = parseText(data, pos, 1);
         byte[] cypherText = new byte[(int)message[0]];
         byte[] signValue = new byte[(int)message[1]];
         System.arraycopy(message, 2, cypherText, 0, cypherText.length);
         System.arraycopy(message, 2+cypherText.length, signValue, 0, signValue.length);
         if(CryptoUtil.verifyMessage(certificate, cypherText, signValue)){
             text = Util.deLoadCode(CryptoUtil.deCrypt(passwd, cypherText));
+            System.out.println("text"+new String(text));
         }else {
-            JOptionPane.showMessageDialog(null, "该消息已被篡改！");
+            JOptionPane.showMessageDialog(null, "该消息已被攻击！");
             text = new byte[]{};
         }
         msn = parseMsn(text);
         flightId = parseFlightID(text);
         freetext = parseFreeText(text);
+        return pos + text.length;
+    }
+
+    @Override
+    public int parseContentData(byte[] data, boolean isCertificated, SecretKey secretKey) throws Exception {
+        int pos = super.parseContentData(data, isCertificated, secretKey);
+        text = parseMainBody(parseText(data, pos, 2));
+        flightId = parseFlightID(text);
+        byte[] rawText = parseFreeText(text);
+        if(isCertificated){
+            freetext = CryptoUtil.deCrypt(secretKey, rawText);
+        }else{
+            freetext = rawText;
+        }
+
         return pos + text.length;
     }
 }
