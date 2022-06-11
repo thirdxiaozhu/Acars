@@ -4,6 +4,7 @@ import com.formdev.flatlaf.FlatIntelliJLaf;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import javax.swing.*;
+import java.awt.*;
 import java.net.UnknownHostException;
 import java.security.Security;
 
@@ -13,6 +14,7 @@ import java.security.Security;
 public class Main {
 
     private static void createGUI() throws UnknownHostException {
+        ImageIcon imageIcon = new ImageIcon("src/main/resources/79912bf08255554390402759a50d45b3.png");
         FlatIntelliJLaf.install();
         //窗口标题
         JFrame frame = new JFrame("启动软件");
@@ -28,6 +30,7 @@ public class Main {
         //禁止调整大小
         frame.setResizable(false);
         frame.setSize(600, 300);
+        frame.setIconImage(imageIcon.getImage().getScaledInstance(80, 80, Image.SCALE_DEFAULT));
     }
 
     /**
@@ -36,6 +39,7 @@ public class Main {
      * @param args
      */
     public static void main(String[] args) {
+        System.out.println((char) 20);
         Security.addProvider(new BouncyCastleProvider());
 
         javax.swing.SwingUtilities.invokeLater(new Runnable() {

@@ -26,7 +26,7 @@
         </constraints>
         <properties>
           <font size="26"/>
-          <text value="航空甚高频ACARS数据链安全通信仿真平台"/>
+          <text value="航空甚高频ACARS数据链通信安全仿真平台"/>
         </properties>
       </component>
       <grid id="7d2b8" layout-manager="GridBagLayout">
@@ -89,7 +89,7 @@
               <gridbag weightx="5.0" weighty="0.0"/>
             </constraints>
           </hspacer>
-          <component id="4be33" class="javax.swing.JButton" binding="MethodButton">
+          <component id="4be33" class="javax.swing.JButton" binding="methodButton">
             <constraints>
               <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
               <gridbag weightx="1.0" weighty="0.0"/>
@@ -98,7 +98,7 @@
               <text value="使用方法"/>
             </properties>
           </component>
-          <component id="11217" class="javax.swing.JButton" binding="AboutButton">
+          <component id="11217" class="javax.swing.JButton" binding="aboutButton">
             <constraints>
               <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
               <gridbag weightx="1.0" weighty="0.0"/>
@@ -135,18 +135,9 @@
         <properties/>
         <border type="none"/>
         <children>
-          <component id="21430" class="javax.swing.JLabel" binding="icon">
-            <constraints>
-              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-              <gridbag top="10" left="10" bottom="0" right="0" weightx="0.0" weighty="0.5"/>
-            </constraints>
-            <properties>
-              <text value=""/>
-            </properties>
-          </component>
           <hspacer id="38200">
             <constraints>
-              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
               <gridbag weightx="1.0" weighty="0.5"/>
             </constraints>
           </hspacer>

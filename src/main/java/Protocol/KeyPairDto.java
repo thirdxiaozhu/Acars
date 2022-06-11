@@ -7,8 +7,8 @@ import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
 import java.util.Base64;
 
 public class KeyPairDto {
-    private BCECPublicKey publicKeyStr;
-    private BCECPrivateKey privateKeyStr;
+    private final BCECPublicKey publicKeyStr;
+    private final BCECPrivateKey privateKeyStr;
 
 
     public KeyPairDto(BCECPublicKey publicKeyStr, BCECPrivateKey privateKeyStr) {

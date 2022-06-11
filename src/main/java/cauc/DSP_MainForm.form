@@ -415,9 +415,9 @@
                 </constraints>
                 <properties>
                   <model>
-                    <item value="无"/>
-                    <item value="模式1"/>
-                    <item value="模式2"/>
+                    <item value="非处理模式"/>
+                    <item value="逐次认证模式"/>
+                    <item value="传输层处理模式"/>
                   </model>
                 </properties>
               </component>
@@ -568,6 +568,14 @@
                         </properties>
                       </component>
                     </children>
+                  </grid>
+                  <grid id="b4675" binding="mode0" layout-manager="GridBagLayout">
+                    <constraints>
+                      <card name="Card3"/>
+                    </constraints>
+                    <properties/>
+                    <border type="none"/>
+                    <children/>
                   </grid>
                 </children>
               </grid>

@@ -24,6 +24,22 @@ public class DSP_MainForm {
     public JTextField key;
     public JTextArea detail;
     public JTextArea text;
+    public JTextField port;
+    public JButton startDSP;
+    public JButton sendMessage;
+    public JButton closeDSP;
+    public JButton preview;
+    public JLabel stateLabel;
+    public JButton DSPButton;
+    public JButton CMUButton;
+    public ServerListener serverListener;
+    public DefaultListModel<BasicProtocol> messageListModel;
+    public DNDialog DSPDialog;
+    public DNDialog CMUDialog;
+    public String passwd;
+    public String ID;
+    public SelfCertificate certificate;
+    public int stateMod = 0;
     private JLabel mode;
     private JLabel arn;
     private JLabel label;
@@ -32,37 +48,21 @@ public class DSP_MainForm {
     private JLabel tak;
     private JLabel utc;
     private JPanel infoPanel;
-    public JTextField port;
-    public JButton startDSP;
-    public JButton sendMessage;
-    public JButton closeDSP;
-    public JButton preview;
-    public JLabel stateLabel;
     private JList messageList;
     private JButton noAckMessage;
     private JLabel utcLabel;
-    public JButton DSPButton;
-    public JButton CMUButton;
     private JPanel SignPanel;
     private JLabel signState;
     private JTextField passwdField;
     private JButton passwdbtn;
-    private JComboBox modComboBox;
+    public JComboBox modComboBox;
     private JPanel card;
     private CardLayout cardLayout;
     private JPanel mode1;
     private JPanel mode2;
     private JTextField IDField;
     private JButton CertifButton;
-    public ServerListener serverListener;
-    public DefaultListModel<BasicProtocol> messageListModel;
-    public DNDialog DSPDialog;
-    public DNDialog CMUDialog;
-    public String passwd;
-    public String ID;
-    public SelfCertificate certificate;
-    ;
-    public int stateMod = 0;
+    private JPanel mode0;
 
     public DSP_MainForm() {
         addCard();
@@ -71,7 +71,7 @@ public class DSP_MainForm {
     }
 
     private void initPanel() {
-        startDSP.setEnabled(false);
+        startDSP.setEnabled(true);
         closeDSP.setEnabled(false);
         sendMessage.setEnabled(false);
         preview.setEnabled(false);
@@ -81,8 +81,6 @@ public class DSP_MainForm {
         detail.setBorder(BorderFactory.createEtchedBorder(0));
         infoPanel.setBorder(BorderFactory.createEtchedBorder(0));
         SignPanel.setBorder(BorderFactory.createEtchedBorder(0));
-        setButtonState(false);
-        System.out.println(stateMod);
 
         //发送按钮监听器
         sendMessage.addActionListener(new ActionListener() {
@@ -157,6 +155,7 @@ public class DSP_MainForm {
     private void addCard() {
         cardLayout = new CardLayout();
         card.setLayout(cardLayout);
+        card.add(mode0, "0");
         card.add(mode1, "1");
         card.add(mode2, "2");
     }
@@ -164,7 +163,7 @@ public class DSP_MainForm {
     private void callPreviewLayout() {
         JFrame frame = new JFrame("预览");
         //构建窗口, this是父窗口，传入子窗口以便传值 , 同时要传入子窗口自身,以保证实现窗口关闭功能
-        frame.setContentPane(new Preview(frame, DSP_MainForm.this, null).previewPanel);
+        frame.setContentPane(new Preview(frame, DSP_MainForm.this, stateMod).previewPanel);
         frame.pack();
         frame.setVisible(true);
         frame.setLayout(null);
@@ -244,9 +243,7 @@ public class DSP_MainForm {
     public void initSignPanel() {
         signState.setForeground(Color.red);
         if (stateMod == 0) {
-            signState.setForeground(Color.decode("#008000"));
-            signState.setText("状态：已完成");
-            setButtonState(false);
+            initMode0Panel();
         } else if (stateMod == 1) {
             initMode1Panel();
         } else {
@@ -254,17 +251,15 @@ public class DSP_MainForm {
         }
     }
 
-    void setButtonState(boolean state) {
-        startDSP.setEnabled(!state);
-        DSPButton.setEnabled(state);
-        CMUButton.setEnabled(state);
-        passwdbtn.setEnabled(state);
-        passwdField.setEnabled(state);
+    private void initMode0Panel() {
+        startDSP.setEnabled(true);
+        signState.setForeground(Color.decode("#008000"));
+        signState.setText("状态：已完成");
     }
 
     private void initMode1Panel() {
+        startDSP.setEnabled(false);
         signState.setText("状态：未完成");
-        setButtonState(true);
         DSPButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -335,6 +330,7 @@ public class DSP_MainForm {
     }
 
     private void initMode2Panel() {
+        startDSP.setEnabled(false);
         SignPanel.setBorder(BorderFactory.createEtchedBorder(0));
         signState.setForeground(Color.red);
         CertifButton.addActionListener(new ActionListener() {

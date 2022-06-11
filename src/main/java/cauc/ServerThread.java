@@ -15,19 +15,18 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ServerThread implements Runnable {
+    private static final ConcurrentHashMap<String, Socket> onLineCMU = new ConcurrentHashMap<>();
+    private static final List<BasicProtocol> protocolList = new ArrayList<>();
+    public SecretKey symmetricKey;
     private SendTask sendTask;
     private ReceiveTask receiveTask;
-    private Socket socket;
+    private final Socket socket;
     private InetAddress inetAddress;
-    private DSP_MainForm DSPMainForm;
-    private String userIP;
+    private final DSP_MainForm DSPMainForm;
+    private final String userIP;
     private boolean notified;
     private boolean certified;
-    public SecretKey symmetricKey;
-
-    private volatile ConcurrentLinkedQueue<BasicProtocol> dataQueue = new ConcurrentLinkedQueue<>();
-    private static ConcurrentHashMap<String, Socket> onLineCMU = new ConcurrentHashMap<>();
-    private static List<BasicProtocol> protocolList = new ArrayList<>();
+    private final ConcurrentLinkedQueue<BasicProtocol> dataQueue = new ConcurrentLinkedQueue<>();
 
     public ServerThread(Socket socket, DSP_MainForm DSPMainForm) throws IOException {
         this.socket = socket;
@@ -52,7 +51,6 @@ public class ServerThread implements Runnable {
     public void run() {
         try {
             JOptionPane.showMessageDialog(DSPMainForm.mainPanel, "有设备接入");
-            System.out.println("有设备接入");
 
             //开始接收线程
             receiveTask = new ReceiveTask();
@@ -100,7 +98,6 @@ public class ServerThread implements Runnable {
      * @param data
      */
     public void addRequest(BasicProtocol data) {
-        System.out.println(new String(data.getContentData()));
         if (!isConnected()) {
             return;
         }
@@ -128,11 +125,48 @@ public class ServerThread implements Runnable {
         if (socket.isClosed() || !socket.isConnected()) {
             onLineCMU.remove(userIP);
             ServerThread.this.stop();
-            System.out.println("socket closed");
 
             return false;
         }
         return true;
+    }
+
+    private DownlinkProtocol processProtocol(InputStream inputStream) {
+        DownlinkProtocol receivedProtocol = (DownlinkProtocol) SocketUtil.readFromStream(inputStream, DownlinkProtocol.PROTOCOL_TYPE, isCertified(), symmetricKey);
+        if (receivedProtocol != null) {
+
+            if (!isCertified()) {
+                byte[] freeText = receivedProtocol.getFreeText();
+                if ("HELLO".equals(new String(freeText))) {
+                    setNotified();
+                    addRequest(Message.uplinkMessage(DSPMainForm, Message.CERTIFICATE));
+                } else {
+                    byte[] temp = CryptoUtil.decryptSymmetricalKey(DSPMainForm.certificate.getKeyPairDto().getPrivateKey(), receivedProtocol.getFreeText());
+                    if (temp != null) {
+                        symmetricKey = new SecretKeySpec(temp, "SM4");
+                        setCertified(true);
+                    }
+                }
+            }
+        }
+        return receivedProtocol;
+    }
+
+    public boolean isNotified() {
+        return notified;
+    }
+
+    private void setNotified() {
+        this.notified = true;
+    }
+
+    public boolean isCertified() {
+        return certified;
+    }
+
+    public void setCertified(boolean certified) {
+        this.certified = certified;
+
     }
 
     /**
@@ -154,18 +188,9 @@ public class ServerThread implements Runnable {
                     if (inputStream != null) {
                         BasicProtocol receivedProtocol = null;
                         switch (DSPMainForm.stateMod) {
-                            case 0: {
-                                receivedProtocol = SocketUtil.readFromStream(inputStream, DownlinkProtocol.PROTOCOL_TYPE);
-                                break;
-                            }
-                            case 1: {
-                                receivedProtocol = SocketUtil.readFromStream(DSPMainForm.CMUDialog.certificate, DSPMainForm.passwd, inputStream, DownlinkProtocol.PROTOCOL_TYPE);
-                                break;
-                            }
-                            case 2: {
-                                receivedProtocol = processProtocol(inputStream);
-                                break;
-                            }
+                            case 0 -> receivedProtocol = SocketUtil.readFromStream(inputStream, DownlinkProtocol.PROTOCOL_TYPE);
+                            case 1 -> receivedProtocol = SocketUtil.readFromStream(DSPMainForm.CMUDialog.certificate, DSPMainForm.passwd, inputStream, DownlinkProtocol.PROTOCOL_TYPE);
+                            case 2 -> receivedProtocol = processProtocol(inputStream);
                         }
                         if (receivedProtocol != null) {
                             int flag = 0;
@@ -191,27 +216,6 @@ public class ServerThread implements Runnable {
                 e.printStackTrace();
             }
         }
-    }
-
-    private DownlinkProtocol processProtocol(InputStream inputStream) {
-        DownlinkProtocol receivedProtocol = (DownlinkProtocol) SocketUtil.readFromStream(inputStream, DownlinkProtocol.PROTOCOL_TYPE, isCertified(), symmetricKey);
-        if (receivedProtocol != null) {
-
-            if (!isCertified()) {
-                byte[] freeText = receivedProtocol.getFreeText();
-                if ("HELLO".equals(new String(freeText))) {
-                    setNotified(true);
-                    addRequest(Message.uplinkMessage(DSPMainForm, Message.CERTIFICATE));
-                } else {
-                    byte[] temp = CryptoUtil.decryptSymmetricalKey(DSPMainForm.certificate.getKeyPairDto().getPrivateKey(), receivedProtocol.getFreeText());
-                    if (temp != null) {
-                        symmetricKey = new SecretKeySpec(temp, "SM4");
-                        setCertified(true);
-                    }
-                }
-            }
-        }
-        return receivedProtocol;
     }
 
     /**
@@ -241,22 +245,5 @@ public class ServerThread implements Runnable {
 
             SocketUtil.closeOutputStream(outputStream);
         }
-    }
-
-    public boolean isNotified() {
-        return notified;
-    }
-
-    private void setNotified(boolean notified) {
-        this.notified = notified;
-    }
-
-    public boolean isCertified() {
-        return certified;
-    }
-
-    public void setCertified(boolean certified) {
-        this.certified = certified;
-
     }
 }

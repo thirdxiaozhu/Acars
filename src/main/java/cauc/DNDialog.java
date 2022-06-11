@@ -15,10 +15,13 @@ import java.security.cert.Certificate;
  */
 public class DNDialog {
     public JPanel SignInfoPanel;
+    public JLabel Title;
+    public KeyPair keyPair;
+    public Certificate certificate;
+    public JButton fatherButton;
     private JTextField CN;
     private JButton SaveBtn;
     private JButton CloseBtn;
-    public JLabel Title;
     private JTextField OU;
     private JTextField O;
     private JTextField L;
@@ -26,10 +29,7 @@ public class DNDialog {
     private JTextField C;
     private JButton ClearBtn;
     private JFrame mainFrame;
-    private int mode;
-    public KeyPair keyPair;
-    public Certificate certificate;
-    public JButton fatherButton;
+    private final int mode;
 
     /**
      * 构造方法

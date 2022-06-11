@@ -9,7 +9,7 @@ import Protocol.Message;
 public class ConnectionClient {
     public boolean isClosed;
 
-    private ConnectionThread connectionThread;
+    private final ConnectionThread connectionThread;
 
     /**
      * 创建新的线程
@@ -46,6 +46,10 @@ public class ConnectionClient {
     public void closeConnection() {
         isClosed = true;
         connectionThread.stop();
+    }
+
+    public ConnectionThread getConnectionThread(){
+        return connectionThread;
     }
 
 }

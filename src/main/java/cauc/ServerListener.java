@@ -5,7 +5,10 @@ import Protocol.Message;
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
-import java.net.*;
+import java.net.BindException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -28,16 +31,19 @@ public class ServerListener {
             serverSocket = new ServerSocket(port);
             isStart = true;
 
+            int mode = DSPMainForm.modComboBox.getSelectedIndex();
+            if(mode == 1 || mode == 2){
+                DSPMainForm.preview.setEnabled(true);
+            }
+
             DSPMainForm.port.setEnabled(false);
             DSPMainForm.startDSP.setEnabled(false);
             DSPMainForm.closeDSP.setEnabled(true);
             DSPMainForm.sendMessage.setEnabled(true);
-            DSPMainForm.preview.setEnabled(true);
             DSPMainForm.stateLabel.setText("当前连接状态：已启动");
             //#008000 ->纯绿色RGB
             DSPMainForm.stateLabel.setForeground(Color.decode("#008000"));
 
-            System.out.println(String.format("启动成功！端口号%d", port));
             while (isStart) {
                 Socket socket = serverSocket.accept();
                 serverThread = new ServerThread(socket, DSPMainForm);
@@ -69,7 +75,7 @@ public class ServerListener {
     }
 
     public void closeConnection() throws IOException {
-        if(serverSocket != null){
+        if (serverSocket != null) {
             serverSocket.close();
         }
     }
@@ -80,12 +86,15 @@ public class ServerListener {
      */
     public void addNewRequest(DSP_MainForm DSPMainForm) {
         if (serverThread != null && isStart) {
-            System.out.println("statemod" + DSPMainForm.stateMod);
             switch (DSPMainForm.stateMod) {
                 case 0 -> serverThread.addRequest(Message.uplinkMessage(DSPMainForm, Message.NONE));
                 case 1 -> serverThread.addRequest(Message.uplinkMessage(DSPMainForm, Message.ENCRYPT));
-                case 2-> serverThread.addRequest(Message.uplinkMessage(DSPMainForm, Message.ENCRYPT_MOD_2, serverThread.symmetricKey));
+                case 2 -> serverThread.addRequest(Message.uplinkMessage(DSPMainForm, Message.ENCRYPT_MOD_2, serverThread.symmetricKey));
             }
         }
+    }
+
+    public ServerThread getServerThread(){
+        return serverThread;
     }
 }

@@ -25,24 +25,21 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public class ConnectionThread implements Runnable {
 
+    private static final List<BasicProtocol> protocolList = new ArrayList<>();
+    public SecretKey secretKey;
+    protected volatile ConcurrentLinkedQueue<BasicProtocol> dataQueue = new ConcurrentLinkedQueue<>();
     private Socket socket;
-    private String IP;
-    private String port;
+    private final String IP;
+    private final String port;
     private SendTask sendTask;
     private ReceiveTask receiveTask;
-    private CMU_MainForm CMUMainForm;
+    private final CMU_MainForm CMUMainForm;
     private boolean notified;
     private boolean certified;
-    public SecretKey secretKey;
-
-    private byte[] DspId = new byte[10];
-    private byte[] publicKey = new byte[91];
-
+    private final byte[] DspId = new byte[10];
+    private final byte[] publicKey = new byte[91];
     private boolean isSockAvailable;
     private boolean closeSendTask;
-    private static List<BasicProtocol> protocolList = new ArrayList<>();
-
-    protected volatile ConcurrentLinkedQueue<BasicProtocol> dataQueue = new ConcurrentLinkedQueue<>();
 
     public ConnectionThread(String ip, String port, CMU_MainForm CMUMainForm) {
         this.IP = ip;
@@ -201,82 +198,6 @@ public class ConnectionThread implements Runnable {
         return true;
     }
 
-    /**
-     * 接受线程
-     */
-    public class ReceiveTask extends Thread {
-        private boolean isCancle;
-        private InputStream inputStream;
-
-        @Override
-        public void run() {
-            while (!isCancle) {
-                if (!isConnected()) {
-                    isCancle = true;
-                    break;
-                }
-
-                if (inputStream != null) {
-                    BasicProtocol receivedProtocol = null;
-                    switch (CMUMainForm.stateMod) {
-                        case 0: {
-                            receivedProtocol = SocketUtil.readFromStream(inputStream, UplinkProtocol.PROTOCOL_TYPE);
-                            break;
-                        }
-                        case 1: {
-                            receivedProtocol = SocketUtil.readFromStream(CMUMainForm.DSPCertificate, CMUMainForm.signValueList, CMUMainForm.passwd, inputStream, UplinkProtocol.PROTOCOL_TYPE);
-                            break;
-                        }
-                        case 2: {
-                            receivedProtocol = processProtocol(inputStream);
-                            break;
-                        }
-                    }
-                    if (receivedProtocol != null) {
-                        CMUMainForm.messageListModel.addElement(receivedProtocol);
-                    } else {
-                        ConnectionThread.this.stop();
-                        CMUMainForm.closeEvent();
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * 发送线程
-     */
-    public class SendTask extends Thread {
-        private boolean isCancle = false;
-        private OutputStream outputStream;
-
-        @Override
-        public void run() {
-            while (!isCancle) {
-                if (!isConnected()) {
-                    break;
-                }
-
-                BasicProtocol protocol = dataQueue.poll();
-                if (protocol == null) {
-                    toWait(dataQueue);
-                    if (closeSendTask) {
-                        closeSendTask();
-                    }
-                } else if (outputStream != null) {
-                    synchronized (outputStream) {
-                        SocketUtil.write2Stream(protocol, outputStream);
-                        CMUMainForm.lastProtocol = (DownlinkProtocol) protocol;
-                    }
-                }
-            }
-
-            //循环结束退出输出流
-            SocketUtil.closeOutputStream(outputStream);
-        }
-    }
-
     public boolean isNotified() {
         return notified;
     }
@@ -334,5 +255,72 @@ public class ConnectionThread implements Runnable {
         }
 
         return receivedProtocol;
+    }
+
+    /**
+     * 接受线程
+     */
+    public class ReceiveTask extends Thread {
+        private boolean isCancle;
+        private InputStream inputStream;
+
+        @Override
+        public void run() {
+            while (!isCancle) {
+                if (!isConnected()) {
+                    isCancle = true;
+                    break;
+                }
+
+                if (inputStream != null) {
+                    BasicProtocol receivedProtocol = null;
+                    switch (CMUMainForm.stateMod) {
+                        case 0 -> receivedProtocol = SocketUtil.readFromStream(inputStream, UplinkProtocol.PROTOCOL_TYPE);
+                        case 1 -> receivedProtocol = SocketUtil.readFromStream(CMUMainForm.DSPCertificate, CMUMainForm.signValueList, CMUMainForm.passwd, inputStream, UplinkProtocol.PROTOCOL_TYPE);
+                        case 2 -> receivedProtocol = processProtocol(inputStream);
+                    }
+                    if (receivedProtocol != null) {
+                        CMUMainForm.messageListModel.addElement(receivedProtocol);
+                    } else {
+                        ConnectionThread.this.stop();
+                        CMUMainForm.closeEvent();
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 发送线程
+     */
+    public class SendTask extends Thread {
+        private boolean isCancle = false;
+        private OutputStream outputStream;
+
+        @Override
+        public void run() {
+            while (!isCancle) {
+                if (!isConnected()) {
+                    break;
+                }
+
+                BasicProtocol protocol = dataQueue.poll();
+                if (protocol == null) {
+                    toWait(dataQueue);
+                    if (closeSendTask) {
+                        closeSendTask();
+                    }
+                } else if (outputStream != null) {
+                    synchronized (outputStream) {
+                        SocketUtil.write2Stream(protocol, outputStream);
+                        CMUMainForm.lastProtocol = (DownlinkProtocol) protocol;
+                    }
+                }
+            }
+
+            //循环结束退出输出流
+            SocketUtil.closeOutputStream(outputStream);
+        }
     }
 }

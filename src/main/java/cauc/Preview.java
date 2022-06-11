@@ -14,21 +14,34 @@ public class Preview {
     private JTextArea PlainText;
     private JTextArea CipherText;
     private JButton AcceptBtn;
-    private DSP_MainForm DSPMainForm = null;
-    private CMU_MainForm CMUMainForm = null;
+    private Protocol plain = null;
+    private Protocol cipher = null;
 
 
-    public Preview(JFrame frame, DSP_MainForm DSPMainForm, CMU_MainForm CMUMainForm) {
-        this.DSPMainForm = DSPMainForm;
-        this.CMUMainForm = CMUMainForm;
-        Protocol plain = null;
-        Protocol cipher = null;
-        if (DSPMainForm != null) {
-            plain = (DownlinkProtocol) Message.downlinkMessage(CMUMainForm, Message.PREVIEW);
-            cipher = (DownlinkProtocol) Message.downlinkMessage(CMUMainForm, Message.ENCRYPT);
-        } else {
-            plain = (UplinkProtocol) Message.uplinkMessage(DSPMainForm, Message.PREVIEW);
-            cipher = (UplinkProtocol) Message.uplinkMessage(DSPMainForm, Message.ENCRYPT);
+    public Preview(JFrame frame, DSP_MainForm DSPMainForm, int stateMod) {
+        plain = Message.uplinkMessage(DSPMainForm, Message.NONE);
+        if(stateMod == 1){
+            cipher = Message.uplinkMessage(DSPMainForm, Message.ENCRYPT);
+        }else {
+            cipher = Message.uplinkMessage(DSPMainForm, Message.ENCRYPT_MOD_2, DSPMainForm.serverListener.getServerThread().symmetricKey);
+        }
+        CipherText.setText(Util.getCypherText(cipher));
+        PlainText.setText(Util.getUntreatedPlainText(plain));
+
+        AcceptBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                frame.dispose();
+            }
+        });
+    }
+
+    public Preview(JFrame frame, CMU_MainForm CMUMainForm, int stateMod) {
+        plain = Message.downlinkMessage(CMUMainForm, Message.NONE);
+        if(stateMod == 1){
+            cipher = Message.downlinkMessage(CMUMainForm, Message.ENCRYPT);
+        }else {
+            cipher = Message.downlinkMessage(CMUMainForm, Message.ENCRYPT_MOD_2, null, CMUMainForm.client.getConnectionThread().secretKey);
         }
         CipherText.setText(Util.getCypherText(cipher));
         PlainText.setText(Util.getUntreatedPlainText(plain));

@@ -24,11 +24,12 @@ import java.security.cert.Certificate;
 public class CryptoUtil {
     /**
      * 对秘钥进行散列，返回SM4所需要的秘钥格式
+     *
      * @param password
      * @return
      * @throws Exception
      */
-    private static Key operateKey(String password) throws Exception{
+    private static Key operateKey(String password) throws Exception {
         byte[] passwd = password.getBytes();
 
         //MD5可生成128位散列值(必须为128位)
@@ -43,26 +44,28 @@ public class CryptoUtil {
 
     /**
      * 加密
+     *
      * @param plaintext
      * @return
      * @throws Exception
      */
-    public static byte[] enCrypt(String passwd, byte[] plaintext) throws Exception{
+    public static byte[] enCrypt(String passwd, byte[] plaintext) throws Exception {
         Cipher cipher = Cipher.getInstance("SM4/ECB/PKCS5PADDING",
                 BouncyCastleProvider.PROVIDER_NAME);
 
         //加密
-        cipher.init(Cipher.ENCRYPT_MODE , operateKey(passwd));
+        cipher.init(Cipher.ENCRYPT_MODE, operateKey(passwd));
         return cipher.doFinal(plaintext);
     }
 
     /**
      * 加密
+     *
      * @param plaintext
      * @return
      * @throws Exception
      */
-    public static byte[] enCrypt(SecretKey key, byte[] plaintext) throws Exception{
+    public static byte[] enCrypt(SecretKey key, byte[] plaintext) throws Exception {
         Cipher cipher = Cipher.getInstance("SM4/ECB/PKCS5PADDING",
                 BouncyCastleProvider.PROVIDER_NAME);
 
@@ -73,25 +76,27 @@ public class CryptoUtil {
 
     /**
      * 解密
+     *
      * @param ciphertext
      * @return
      * @throws Exception
      */
-    public static byte[] deCrypt(String passwd, byte[] ciphertext) throws Exception{
+    public static byte[] deCrypt(String passwd, byte[] ciphertext) throws Exception {
         Cipher cipher = Cipher.getInstance("SM4/ECB/PKCS5PADDING",
                 BouncyCastleProvider.PROVIDER_NAME);
-        cipher.init(Cipher.DECRYPT_MODE , operateKey(passwd));
+        cipher.init(Cipher.DECRYPT_MODE, operateKey(passwd));
 
         return cipher.doFinal(ciphertext);
     }
 
     /**
      * 解密
+     *
      * @param ciphertext
      * @return
      * @throws Exception
      */
-    public static byte[] deCrypt(SecretKey secretKey, byte[] ciphertext) throws Exception{
+    public static byte[] deCrypt(SecretKey secretKey, byte[] ciphertext) throws Exception {
         Cipher cipher = Cipher.getInstance("SM4/ECB/PKCS5PADDING",
                 BouncyCastleProvider.PROVIDER_NAME);
         cipher.init(Cipher.DECRYPT_MODE, secretKey);
@@ -101,25 +106,27 @@ public class CryptoUtil {
 
     /**
      * 签名
-     * @param privateKey 私钥
+     *
+     * @param privateKey  私钥
      * @param cryptedText 密文
-     * @param length 密文长度
+     * @param length      密文长度
      * @return 签名值
      * @throws Exception
      */
     public static byte[] signMessage(PrivateKey privateKey, byte[] cryptedText, int length) throws Exception {
         Signature signature = Signature.getInstance("SM3WITHSM2");
         signature.initSign(privateKey);
-        signature.update(cryptedText,0, length);
+        signature.update(cryptedText, 0, length);
 
         return signature.sign();
     }
 
     /**
      * 验证签名
+     *
      * @param certificate 数字证书获取公钥
-     * @param cypherText 密文
-     * @param signValue 签名之
+     * @param cypherText  密文
+     * @param signValue   签名之
      * @return 布尔值
      * @throws Exception
      */
@@ -130,26 +137,24 @@ public class CryptoUtil {
         return signature.verify(signValue);
     }
 
-    public static SecretKey getSymmetricalKey(){
+    public static SecretKey getSymmetricalKey() {
         try {
             KeyGenerator kg = KeyGenerator.getInstance("SM4");
             //下面调用方法的参数决定了生成密钥的长度，可以修改为128, 192或256
             kg.init(128);
             SecretKey sk = kg.generateKey();
             return sk;
-        }
-        catch (NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    public static byte[] encryptSymmetricalKey(byte[] data, PublicKey publicKey){
+    public static byte[] encryptSymmetricalKey(byte[] data, PublicKey publicKey) {
         ECPublicKeyParameters localECPublicKeyParameters = null;
 
-        if (publicKey instanceof BCECPublicKey)
-        {
-            BCECPublicKey localECPublicKey = (BCECPublicKey)publicKey;
+        if (publicKey instanceof BCECPublicKey) {
+            BCECPublicKey localECPublicKey = (BCECPublicKey) publicKey;
             ECParameterSpec localECParameterSpec = localECPublicKey.getParameters();
             ECDomainParameters localECDomainParameters = new ECDomainParameters(
                     localECParameterSpec.getCurve(), localECParameterSpec.getG(),
@@ -164,14 +169,13 @@ public class CryptoUtil {
         try {
             arrayOfByte2 = localSM2Engine.processBlock(data, 0, data.length);
             return arrayOfByte2;
-        }
-        catch (InvalidCipherTextException e) {
+        } catch (InvalidCipherTextException e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    public static byte[] decryptSymmetricalKey(PrivateKey privateKey, byte[] cipherData){
+    public static byte[] decryptSymmetricalKey(PrivateKey privateKey, byte[] cipherData) {
 
         BCECPrivateKey bcecPrivateKey = (BCECPrivateKey) privateKey;
         ECParameterSpec ecParameterSpec = bcecPrivateKey.getParameters();
@@ -191,7 +195,6 @@ public class CryptoUtil {
             return arrayOfBytes;
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("SM2解密时出现异常");
             return null;
         }
     }

@@ -25,6 +25,20 @@ public class CMU_MainForm {
     public JTextField takInput;
     public JTextArea detail;
     public JTextArea text;
+    public JTextField port;
+    public JButton connect;
+    public JButton sendMessage;
+    public JButton closeCMU;
+    public JButton preview;
+    public JLabel stateLabel;
+    public ConnectionClient client = null;
+    public DefaultListModel<BasicProtocol> messageListModel;
+    public PrivateKey privateKey;
+    public Certificate DSPCertificate;
+    public String passwd;
+    public ArrayList<String> signValueList = new ArrayList<>();
+    public DownlinkProtocol lastProtocol;
+    public int stateMod;
     private JLabel mode;
     private JLabel arn;
     private JLabel label;
@@ -32,24 +46,10 @@ public class CMU_MainForm {
     private JLabel dubi;
     private JLabel tak;
     private JPanel infoPanel;
-    public JTextField port;
-    public JButton connect;
-    public JButton sendMessage;
-    public JButton closeCMU;
-    public JButton preview;
-    public JLabel stateLabel;
     private JList messageList;
     private JTextField ip;
     private JButton replay;
-    public ConnectionClient client = null;
-    public DefaultListModel<BasicProtocol> messageListModel;
-    private SmiLabelMap mapClass;
-    public PrivateKey privateKey;
-    public Certificate DSPCertificate;
-    public String passwd;
-    public ArrayList<String> signValueList = new ArrayList<>();
-    public DownlinkProtocol lastProtocol;
-    public int stateMod;
+    private final SmiLabelMap mapClass;
 
     public CMU_MainForm() {
         mapClass = new SmiLabelMap();
@@ -89,7 +89,7 @@ public class CMU_MainForm {
                 if (client == null || client.isClosed) {
                     JOptionPane.showMessageDialog(null, "尚未连接");
                 } else {
-                    client.addNewRequest((DownlinkProtocol) lastProtocol);
+                    client.addNewRequest(lastProtocol);
                 }
             }
         });
@@ -115,7 +115,7 @@ public class CMU_MainForm {
     private void callPreviewLayout() {
         JFrame frame = new JFrame("预览");
         //构建窗口, this是父窗口，传入子窗口以便传值 , 同时要传入子窗口自身,以保证实现窗口关闭功能
-        frame.setContentPane(new Preview(frame, null, CMU_MainForm.this).previewPanel);
+        frame.setContentPane(new Preview(frame, CMU_MainForm.this, stateMod).previewPanel);
         frame.pack();
         frame.setVisible(true);
         frame.setLayout(null);
